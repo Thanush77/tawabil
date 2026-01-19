@@ -84,7 +84,7 @@
         "Strong pungent aroma",
         "Dense, heavy corns"
       ],
-      "image": "images/black-pepper.jpg"
+      "image": "images/pepper.jpg"
     },
     {
       "id": "cloves",
@@ -125,7 +125,7 @@
         "Strong clove aroma",
         "Intact flower buds"
       ],
-      "image": "images/cloves.jpg"
+      "image": "images/clove.jpg"
     },
     {
       "id": "cinnamon",
@@ -207,7 +207,7 @@
         "Strong earthy aroma",
         "Uniform size"
       ],
-      "image": "images/cumin.jpg"
+      "image": "images/jeera.jpg"
     },
     {
       "id": "elaichi",
