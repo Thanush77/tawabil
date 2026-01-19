@@ -101,8 +101,9 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`
 ╔═══════════════════════════════════════════════════╗
 ║                                                   ║
 ║   🌿 Tawabil Spices API Server                   ║
@@ -111,7 +112,8 @@ app.listen(PORT, () => {
 ║   Environment: ${process.env.NODE_ENV || 'development'}                    ║
 ║                                                   ║
 ╚═══════════════════════════════════════════════════╝
-    `);
-});
+        `);
+    });
+}
 
 module.exports = app;
