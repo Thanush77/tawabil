@@ -20,7 +20,13 @@
         "Antioxidant properties",
         "Supports heart health"
       ],
-      "packSizes": ["25g", "50g", "100g", "250g", "500g"],
+      "packSizes": [
+        "25g",
+        "50g",
+        "100g",
+        "250g",
+        "500g"
+      ],
       "prices": {
         "25g": 150,
         "50g": 280,
@@ -35,7 +41,7 @@
         "Plump, unbroken pods",
         "No artificial coloring"
       ],
-      "image": "cardamom.jpg"
+      "image": "images/cardamom.jpg"
     },
     {
       "id": "black-pepper",
@@ -57,7 +63,13 @@
         "Enhances nutrient absorption",
         "Rich in piperine"
       ],
-      "packSizes": ["50g", "100g", "250g", "500g", "1kg"],
+      "packSizes": [
+        "50g",
+        "100g",
+        "250g",
+        "500g",
+        "1kg"
+      ],
       "prices": {
         "50g": 80,
         "100g": 150,
@@ -72,7 +84,7 @@
         "Strong pungent aroma",
         "Dense, heavy corns"
       ],
-      "image": "black-pepper.jpg"
+      "image": "images/black-pepper.jpg"
     },
     {
       "id": "cloves",
@@ -94,7 +106,12 @@
         "Aids digestion",
         "Rich in antioxidants"
       ],
-      "packSizes": ["25g", "50g", "100g", "250g"],
+      "packSizes": [
+        "25g",
+        "50g",
+        "100g",
+        "250g"
+      ],
       "prices": {
         "25g": 120,
         "50g": 220,
@@ -108,7 +125,7 @@
         "Strong clove aroma",
         "Intact flower buds"
       ],
-      "image": "cloves.jpg"
+      "image": "images/cloves.jpg"
     },
     {
       "id": "cinnamon",
@@ -130,7 +147,11 @@
         "Antioxidant rich",
         "Supports metabolism"
       ],
-      "packSizes": ["50g", "100g", "250g"],
+      "packSizes": [
+        "50g",
+        "100g",
+        "250g"
+      ],
       "prices": {
         "50g": 90,
         "100g": 170,
@@ -143,7 +164,7 @@
         "Sweet, mild aroma",
         "Easily breakable"
       ],
-      "image": "cinnamon.jpg"
+      "image": "images/cinnamon.jpg"
     },
     {
       "id": "zeera",
@@ -165,7 +186,13 @@
         "Boosts immunity",
         "Improves metabolism"
       ],
-      "packSizes": ["50g", "100g", "250g", "500g", "1kg"],
+      "packSizes": [
+        "50g",
+        "100g",
+        "250g",
+        "500g",
+        "1kg"
+      ],
       "prices": {
         "50g": 60,
         "100g": 110,
@@ -180,7 +207,7 @@
         "Strong earthy aroma",
         "Uniform size"
       ],
-      "image": "cumin.jpg"
+      "image": "images/cumin.jpg"
     }
   ],
   "config": {
