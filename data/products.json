@@ -208,6 +208,82 @@
         "Uniform size"
       ],
       "image": "images/cumin.jpg"
+    },
+    {
+      "id": "elaichi",
+      "name": "Badi Elaichi (Black Cardamom)",
+      "nameHindi": "बड़ी इलायची",
+      "origin": "Sikkim, India",
+      "badge": "Special",
+      "description": "Large, dark brown pods with a smoky flavor. Badi Elaichi is a key ingredient in garam masala and rich gravies, adding depth and earthy aroma.",
+      "culinaryUses": [
+        "Rich Curries",
+        "Pulao & Biryani",
+        "Garam Masala",
+        "Lentil Dishes"
+      ],
+      "healthBenefits": [
+        "Respiratory health",
+        "Good for heart",
+        "Oral health",
+        "Detoxifier"
+      ],
+      "packSizes": [
+        "50g",
+        "100g",
+        "250g"
+      ],
+      "prices": {
+        "50g": 120,
+        "100g": 220,
+        "250g": 500
+      },
+      "storageTips": "Store in a cool, dry place. Keep away from moisture.",
+      "purityIndicators": [
+        "Dark brown color",
+        "Smoky aroma",
+        "Large pods",
+        "No mold"
+      ],
+      "image": "images/elaichi.jpg"
+    },
+    {
+      "id": "cinnamon-round",
+      "name": "Cinnamon (Round)",
+      "nameHindi": "दालचीनी",
+      "origin": "Vietnam / India",
+      "badge": "Strong",
+      "description": "Round cinnamon quills (Cassia) offer a strong, spicy flavor. Thicker bark and higher oil content make it perfect for robust curries and stews.",
+      "culinaryUses": [
+        "Spicy Curries",
+        "Baking",
+        "Flavoring Oils",
+        "Stewing"
+      ],
+      "healthBenefits": [
+        "Antimicrobial",
+        "Anti-inflammatory",
+        "Blood sugar control",
+        "Warming effect"
+      ],
+      "packSizes": [
+        "50g",
+        "100g",
+        "250g"
+      ],
+      "prices": {
+        "50g": 60,
+        "100g": 110,
+        "250g": 250
+      },
+      "storageTips": "Keep in airtight container. Good shelf life.",
+      "purityIndicators": [
+        "Thick hard bark",
+        "Reddish brown",
+        "Strong spicy smell",
+        "Clean quills"
+      ],
+      "image": "images/cinnamon_1.jpg"
     }
   ],
   "config": {
