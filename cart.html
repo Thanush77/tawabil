@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart | Tawabil Spices and More</title>
+  <meta name="description" content="Review your cart and checkout. Premium spices delivered fresh to your doorstep in Bengaluru.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&family=Sacramento&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/components-part2.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/cart.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar scrolled">
+    <div class="container navbar-container">
+      <a href="index.html" class="navbar-logo">
+        <span class="navbar-logo-text">Tawabil <span>Spices</span></span>
+      </a>
+
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="quality.html">Quality</a></li>
+        <li><a href="recipes.html">Recipes</a></li>
+        <li><a href="bulk-orders.html">Bulk Orders</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+
+      <div class="navbar-cta">
+        <a href="cart.html" class="cart-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span class="cart-badge" style="display: none;">0</span>
+        </a>
+        <a href="#" onclick="openWhatsApp()" class="btn btn-whatsapp btn-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Order Now
+        </a>
+      </div>
+
+      <button class="navbar-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu">
+    <ul class="mobile-menu-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="quality.html">Quality</a></li>
+      <li><a href="recipes.html">Recipes</a></li>
+      <li><a href="bulk-orders.html">Bulk Orders</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </div>
+
+  <!-- Cart Page -->
+  <main class="cart-page">
+    <div class="container">
+      <!-- Page Header -->
+      <div class="breadcrumb" style="margin-bottom: var(--space-6);">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <span>Shopping Cart</span>
+      </div>
+
+      <div class="cart-layout">
+        <!-- Cart Main Content -->
+        <div class="cart-main" id="cartMain">
+          <div class="cart-header">
+            <h1>Shopping Cart</h1>
+            <span class="cart-count" id="cartCount">0 items</span>
+          </div>
+
+          <!-- Empty Cart State -->
+          <div class="cart-empty" id="cartEmpty" style="display: none;">
+            <svg class="cart-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added any spices to your cart yet. Explore our premium collection!</p>
+            <a href="products.html" class="btn btn-primary">Browse Products</a>
+          </div>
+
+          <!-- Cart Items -->
+          <div class="cart-items" id="cartItems">
+            <!-- Cart items will be rendered here by JavaScript -->
+          </div>
+
+          <!-- Saved Items Section -->
+          <div class="saved-items-section" id="savedItemsSection" style="display: none;">
+            <div class="saved-items-header">
+              <h3>Saved for Later</h3>
+              <span id="savedCount">0 items</span>
+            </div>
+            <div class="saved-items" id="savedItems">
+              <!-- Saved items will be rendered here by JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <aside class="cart-sidebar" id="cartSidebar">
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+
+            <!-- Delivery Progress -->
+            <div class="delivery-progress" id="deliveryProgress">
+              <p class="delivery-progress-text">
+                Add <strong id="freeDeliveryRemaining">₹500</strong> more for FREE delivery!
+              </p>
+              <div class="delivery-progress-bar">
+                <div class="delivery-progress-fill" id="deliveryProgressFill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Free Delivery Notice -->
+            <div class="free-delivery-notice" id="freeDeliveryNotice" style="display: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>You've unlocked FREE delivery!</span>
+            </div>
+
+            <!-- Min Order Notice -->
+            <div class="min-order-notice" id="minOrderNotice" style="display: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>Minimum order amount is ₹200</span>
+            </div>
+
+            <!-- Summary Rows -->
+            <div class="summary-rows">
+              <div class="summary-row">
+                <span class="label">Subtotal</span>
+                <span class="value" id="subtotal">₹0</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">Delivery Charge</span>
+                <span class="value" id="deliveryCharge">₹40</span>
+              </div>
+              <div class="summary-row total">
+                <span class="label">Total</span>
+                <span class="value" id="totalAmount">₹0</span>
+              </div>
+            </div>
+
+            <!-- Checkout Actions -->
+            <div class="checkout-actions">
+              <a href="checkout.html" class="btn btn-primary btn-lg" id="checkoutBtn">
+                Proceed to Checkout
+              </a>
+              <a href="products.html" class="btn btn-outline">
+                Continue Shopping
+              </a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <span class="footer-logo-text">Tawabil <span>Spices</span></span>
+          </div>
+          <p>Bengaluru's most trusted source for premium, authentic spices. From our family to yours, we bring the finest flavors from India's spice heartlands.</p>
+        </div>
+
+        <div class="footer-column">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="quality.html">Quality</a></li>
+            <li><a href="recipes.html">Recipes</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Products</h4>
+          <ul class="footer-links">
+            <li><a href="products.html#cardamom">Cardamom</a></li>
+            <li><a href="products.html#black-pepper">Black Pepper</a></li>
+            <li><a href="products.html#cloves">Cloves</a></li>
+            <li><a href="products.html#cinnamon">Cinnamon</a></li>
+            <li><a href="products.html#cumin">Cumin Seeds</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Contact</h4>
+          <ul class="footer-contact">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Bengaluru, Karnataka, India</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span>+91 99018 88305</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span>hello@tawabil.com</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2024 Tawabil Spices and More. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Float Button -->
+  <a href="#" onclick="openWhatsApp()" class="whatsapp-float" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    // Product emoji mapping
+    const productEmojis = {
+      'cardamom': '🌿',
+      'black-pepper': '⚫',
+      'cloves': '🌸',
+      'cinnamon': '🍂',
+      'zeera': '🌾'
+    };
+
+    // Format currency
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
+    // Render cart page
+    function renderCartPage() {
+      const cartItems = cart.getItems();
+      const savedItems = cart.getSavedItems();
+      const summary = cart.getCartSummary();
+
+      const cartEmpty = document.getElementById('cartEmpty');
+      const cartItemsContainer = document.getElementById('cartItems');
+      const cartCount = document.getElementById('cartCount');
+      const savedItemsSection = document.getElementById('savedItemsSection');
+      const savedItemsContainer = document.getElementById('savedItems');
+      const savedCount = document.getElementById('savedCount');
+
+      // Update cart count
+      cartCount.textContent = `${summary.itemCount} item${summary.itemCount !== 1 ? 's' : ''}`;
+
+      // Show/hide empty state
+      if (cartItems.length === 0) {
+        cartEmpty.style.display = 'block';
+        cartItemsContainer.style.display = 'none';
+      } else {
+        cartEmpty.style.display = 'none';
+        cartItemsContainer.style.display = 'flex';
+
+        // Render cart items
+        cartItemsContainer.innerHTML = cartItems.map(item => `
+          <div class="cart-item" data-item-id="${item.id}">
+            <div class="cart-item-image" style="background: linear-gradient(135deg, #4A7C59 0%, #2D5A3D 100%);">
+              <span>${productEmojis[item.productId] || '🌶️'}</span>
+            </div>
+            <div class="cart-item-details">
+              <h4 class="cart-item-name">${item.name}</h4>
+              <p class="cart-item-variant">Pack Size: ${item.packSize}</p>
+              <div class="cart-item-actions">
+                <button class="cart-item-action-btn save-for-later" data-item-id="${item.id}">
+                  Save for later
+                </button>
+                <button class="cart-item-action-btn remove" data-item-id="${item.id}">
+                  Remove
+                </button>
+              </div>
+            </div>
+            <div class="cart-item-price-section">
+              <div>
+                <div class="cart-item-price">${formatCurrency(item.price * item.quantity)}</div>
+                <div class="cart-item-unit-price">${formatCurrency(item.price)} each</div>
+              </div>
+              <div class="quantity-control">
+                <button class="quantity-btn decrement" data-item-id="${item.id}">-</button>
+                <span class="quantity-value">${item.quantity}</span>
+                <button class="quantity-btn increment" data-item-id="${item.id}">+</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Saved items
+      if (savedItems.length > 0) {
+        savedItemsSection.style.display = 'block';
+        savedCount.textContent = `${savedItems.length} item${savedItems.length !== 1 ? 's' : ''}`;
+
+        savedItemsContainer.innerHTML = savedItems.map(item => `
+          <div class="saved-item" data-item-id="${item.id}">
+            <div class="saved-item-image">
+              ${productEmojis[item.productId] || '🌶️'}
+            </div>
+            <div class="saved-item-info">
+              <div class="saved-item-name">${item.name}</div>
+              <div class="saved-item-variant">${item.packSize} - ${formatCurrency(item.price)}</div>
+              <div class="saved-item-actions">
+                <button class="btn btn-sm btn-primary move-to-cart" data-item-id="${item.id}">
+                  Move to Cart
+                </button>
+                <button class="btn btn-sm btn-outline remove-saved" data-item-id="${item.id}">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        savedItemsSection.style.display = 'none';
+      }
+
+      // Update order summary
+      updateOrderSummary(summary);
+    }
+
+    // Update order summary
+    function updateOrderSummary(summary) {
+      const subtotal = document.getElementById('subtotal');
+      const deliveryCharge = document.getElementById('deliveryCharge');
+      const totalAmount = document.getElementById('totalAmount');
+      const deliveryProgress = document.getElementById('deliveryProgress');
+      const freeDeliveryNotice = document.getElementById('freeDeliveryNotice');
+      const freeDeliveryRemaining = document.getElementById('freeDeliveryRemaining');
+      const deliveryProgressFill = document.getElementById('deliveryProgressFill');
+      const minOrderNotice = document.getElementById('minOrderNotice');
+      const checkoutBtn = document.getElementById('checkoutBtn');
+
+      subtotal.textContent = formatCurrency(summary.subtotal);
+      deliveryCharge.textContent = summary.isFreeDelivery ? 'FREE' : formatCurrency(summary.deliveryCharge);
+      totalAmount.textContent = formatCurrency(summary.total);
+
+      // Free delivery progress
+      if (summary.isFreeDelivery) {
+        deliveryProgress.style.display = 'none';
+        freeDeliveryNotice.style.display = 'flex';
+      } else {
+        deliveryProgress.style.display = 'block';
+        freeDeliveryNotice.style.display = 'none';
+        freeDeliveryRemaining.textContent = formatCurrency(summary.freeDeliveryRemaining);
+        const progress = Math.min(100, (summary.subtotal / 500) * 100);
+        deliveryProgressFill.style.width = `${progress}%`;
+      }
+
+      // Min order notice
+      if (summary.subtotal > 0 && !summary.meetsMinOrder) {
+        minOrderNotice.style.display = 'flex';
+        checkoutBtn.classList.add('disabled');
+        checkoutBtn.style.pointerEvents = 'none';
+        checkoutBtn.style.opacity = '0.5';
+      } else {
+        minOrderNotice.style.display = 'none';
+        checkoutBtn.classList.remove('disabled');
+        checkoutBtn.style.pointerEvents = 'auto';
+        checkoutBtn.style.opacity = '1';
+      }
+
+      // Disable checkout if cart is empty
+      if (summary.itemCount === 0) {
+        checkoutBtn.style.pointerEvents = 'none';
+        checkoutBtn.style.opacity = '0.5';
+      }
+    }
+
+    // Setup event listeners for cart page
+    function setupCartEventListeners() {
+      const cartItemsContainer = document.getElementById('cartItems');
+      const savedItemsContainer = document.getElementById('savedItems');
+
+      // Quantity buttons
+      cartItemsContainer.addEventListener('click', (e) => {
+        const itemId = e.target.dataset.itemId;
+
+        if (e.target.classList.contains('increment')) {
+          cart.incrementQuantity(itemId);
+          renderCartPage();
+        } else if (e.target.classList.contains('decrement')) {
+          cart.decrementQuantity(itemId);
+          renderCartPage();
+        } else if (e.target.classList.contains('remove')) {
+          cart.removeItem(itemId);
+          renderCartPage();
+        } else if (e.target.classList.contains('save-for-later')) {
+          cart.saveForLater(itemId);
+          renderCartPage();
+        }
+      });
+
+      // Saved items actions
+      savedItemsContainer.addEventListener('click', (e) => {
+        const itemId = e.target.dataset.itemId;
+
+        if (e.target.classList.contains('move-to-cart')) {
+          cart.moveToCart(itemId);
+          renderCartPage();
+        } else if (e.target.classList.contains('remove-saved')) {
+          cart.removeSavedItem(itemId);
+          renderCartPage();
+        }
+      });
+    }
+
+    // Initialize cart page
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait for cart to be initialized
+      setTimeout(() => {
+        renderCartPage();
+        setupCartEventListeners();
+
+        // Add listener for cart changes
+        cart.addListener(() => renderCartPage());
+      }, 100);
+    });
+  </script>
+</body>
+</html>

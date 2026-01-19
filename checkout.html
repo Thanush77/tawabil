@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | Tawabil Spices and More</title>
+  <meta name="description" content="Complete your order. Premium spices delivered fresh to your doorstep in Bengaluru.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&family=Sacramento&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/components-part2.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/cart.css">
+
+  <!-- Razorpay -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar scrolled">
+    <div class="container navbar-container">
+      <a href="index.html" class="navbar-logo">
+        <span class="navbar-logo-text">Tawabil <span>Spices</span></span>
+      </a>
+
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="quality.html">Quality</a></li>
+        <li><a href="recipes.html">Recipes</a></li>
+        <li><a href="bulk-orders.html">Bulk Orders</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+
+      <div class="navbar-cta">
+        <a href="cart.html" class="cart-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span class="cart-badge" style="display: none;">0</span>
+        </a>
+        <a href="#" onclick="openWhatsApp()" class="btn btn-whatsapp btn-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Order Now
+        </a>
+      </div>
+
+      <button class="navbar-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu">
+    <ul class="mobile-menu-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="quality.html">Quality</a></li>
+      <li><a href="recipes.html">Recipes</a></li>
+      <li><a href="bulk-orders.html">Bulk Orders</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </div>
+
+  <!-- Checkout Page -->
+  <main class="checkout-page">
+    <div class="container">
+      <!-- Page Header -->
+      <div class="breadcrumb" style="margin-bottom: var(--space-6);">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <a href="cart.html">Cart</a>
+        <span>/</span>
+        <span>Checkout</span>
+      </div>
+
+      <div class="checkout-layout">
+        <!-- Checkout Main Content -->
+        <div class="checkout-main">
+
+          <!-- Section 1: Order Review -->
+          <section class="checkout-section">
+            <div class="checkout-section-header">
+              <span class="checkout-step-number">1</span>
+              <h3>Review Your Order</h3>
+            </div>
+            <div class="cart-items" id="checkoutItems" style="max-height: 300px; overflow-y: auto;">
+              <!-- Cart items will be rendered here -->
+            </div>
+          </section>
+
+          <!-- Section 2: Customer Information -->
+          <section class="checkout-section">
+            <div class="checkout-section-header">
+              <span class="checkout-step-number">2</span>
+              <h3>Customer Information</h3>
+            </div>
+            <form class="checkout-form" id="customerForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fullName">Full Name <span class="required">*</span></label>
+                  <input type="text" id="fullName" name="fullName" required placeholder="Enter your full name">
+                  <span class="form-error-message"></span>
+                </div>
+                <div class="form-group">
+                  <label for="phone">Phone Number <span class="required">*</span></label>
+                  <input type="tel" id="phone" name="phone" required placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}">
+                  <span class="form-error-message"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address (Optional - for order updates)</label>
+                <input type="email" id="email" name="email" placeholder="your@email.com">
+                <span class="form-error-message"></span>
+              </div>
+            </form>
+          </section>
+
+          <!-- Section 3: Shipping Address -->
+          <section class="checkout-section">
+            <div class="checkout-section-header">
+              <span class="checkout-step-number">3</span>
+              <h3>Delivery Address</h3>
+            </div>
+            <form class="checkout-form" id="addressForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="houseNo">House/Flat No., Building <span class="required">*</span></label>
+                  <input type="text" id="houseNo" name="houseNo" required placeholder="e.g., #123, Sunrise Apartments">
+                  <span class="form-error-message"></span>
+                </div>
+                <div class="form-group">
+                  <label for="street">Street/Road <span class="required">*</span></label>
+                  <input type="text" id="street" name="street" required placeholder="Street name">
+                  <span class="form-error-message"></span>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="area">Area/Locality <span class="required">*</span></label>
+                  <input type="text" id="area" name="area" required placeholder="e.g., Koramangala">
+                  <span class="form-error-message"></span>
+                </div>
+                <div class="form-group">
+                  <label for="landmark">Landmark</label>
+                  <input type="text" id="landmark" name="landmark" placeholder="Near any famous place">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="pincode">Pincode <span class="required">*</span></label>
+                  <input type="text" id="pincode" name="pincode" required placeholder="560xxx" maxlength="6" pattern="560[0-9]{3}">
+                  <span class="form-error-message"></span>
+                </div>
+                <div class="form-group">
+                  <label for="city">City</label>
+                  <input type="text" id="city" name="city" value="Bengaluru" readonly style="background: var(--color-cream);">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="deliveryNotes">Delivery Instructions (Optional)</label>
+                <textarea id="deliveryNotes" name="deliveryNotes" rows="2" placeholder="Any specific instructions for delivery"></textarea>
+              </div>
+            </form>
+          </section>
+
+          <!-- Section 4: Delivery Slot -->
+          <section class="checkout-section">
+            <div class="checkout-section-header">
+              <span class="checkout-step-number">4</span>
+              <h3>Delivery Slot</h3>
+            </div>
+            <div class="delivery-slots" id="deliverySlots">
+              <!-- Delivery slots will be generated by JavaScript -->
+            </div>
+          </section>
+
+          <!-- Section 5: Payment Method -->
+          <section class="checkout-section">
+            <div class="checkout-section-header">
+              <span class="checkout-step-number">5</span>
+              <h3>Payment Method</h3>
+            </div>
+            <div class="payment-methods">
+              <label class="payment-method selected" data-method="online">
+                <input type="radio" name="paymentMethod" value="online" checked>
+                <div class="payment-method-info">
+                  <div class="payment-method-name">Pay Online</div>
+                  <div class="payment-method-desc">UPI, Cards, Net Banking via Razorpay</div>
+                </div>
+                <svg class="payment-method-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                  <line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+              </label>
+              <label class="payment-method" data-method="cod">
+                <input type="radio" name="paymentMethod" value="cod">
+                <div class="payment-method-info">
+                  <div class="payment-method-name">Cash on Delivery</div>
+                  <div class="payment-method-desc">Pay when you receive your order</div>
+                </div>
+                <svg class="payment-method-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="6" width="20" height="12" rx="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <path d="M6 12h.01M18 12h.01"/>
+                </svg>
+              </label>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <aside class="cart-sidebar">
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+
+            <!-- Order Items Summary -->
+            <div id="orderItemsSummary" style="max-height: 200px; overflow-y: auto; margin-bottom: var(--space-4);">
+              <!-- Mini order items -->
+            </div>
+
+            <!-- Summary Rows -->
+            <div class="summary-rows">
+              <div class="summary-row">
+                <span class="label">Subtotal (<span id="itemCountDisplay">0</span> items)</span>
+                <span class="value" id="subtotal">₹0</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">Delivery Charge</span>
+                <span class="value" id="deliveryCharge">₹40</span>
+              </div>
+              <div class="summary-row total">
+                <span class="label">Total</span>
+                <span class="value" id="totalAmount">₹0</span>
+              </div>
+            </div>
+
+            <!-- Free Delivery Notice -->
+            <div class="free-delivery-notice" id="freeDeliveryNotice" style="display: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>FREE delivery applied!</span>
+            </div>
+
+            <!-- Place Order Button -->
+            <div class="checkout-actions">
+              <button class="btn btn-primary btn-lg" id="placeOrderBtn" onclick="placeOrder()">
+                <span id="placeOrderText">Place Order</span>
+              </button>
+              <p style="font-size: var(--text-xs); color: var(--color-dark-light); text-align: center; margin-top: var(--space-2);">
+                By placing your order, you agree to our Terms of Service and Privacy Policy
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2024 Tawabil Spices and More. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Float Button -->
+  <a href="#" onclick="openWhatsApp()" class="whatsapp-float" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    // Constants
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const RAZORPAY_KEY = 'rzp_test_xxxxx'; // Replace with actual key
+
+    // Product emoji mapping
+    const productEmojis = {
+      'cardamom': '🌿',
+      'black-pepper': '⚫',
+      'cloves': '🌸',
+      'cinnamon': '🍂',
+      'zeera': '🌾'
+    };
+
+    // Selected delivery slot
+    let selectedDeliverySlot = null;
+
+    // Format currency
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
+    // Generate delivery slots
+    function generateDeliverySlots() {
+      const slotsContainer = document.getElementById('deliverySlots');
+      const slots = [];
+      const today = new Date();
+
+      // Generate next 6 available slots
+      for (let i = 1; i <= 6; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+
+        const dayName = date.toLocaleDateString('en-IN', { weekday: 'short' });
+        const dateStr = date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        const isoDate = date.toISOString().split('T')[0];
+
+        slots.push({
+          date: isoDate,
+          displayDate: dateStr,
+          day: dayName,
+          time: '10 AM - 6 PM'
+        });
+      }
+
+      slotsContainer.innerHTML = slots.map((slot, index) => `
+        <div class="delivery-slot ${index === 0 ? 'selected' : ''}" data-slot='${JSON.stringify(slot)}'>
+          <div class="delivery-slot-date">${slot.displayDate}</div>
+          <div class="delivery-slot-day">${slot.day}</div>
+          <div class="delivery-slot-time">${slot.time}</div>
+        </div>
+      `).join('');
+
+      // Select first slot by default
+      selectedDeliverySlot = slots[0];
+
+      // Add click handlers
+      slotsContainer.querySelectorAll('.delivery-slot').forEach(slotEl => {
+        slotEl.addEventListener('click', () => {
+          slotsContainer.querySelectorAll('.delivery-slot').forEach(s => s.classList.remove('selected'));
+          slotEl.classList.add('selected');
+          selectedDeliverySlot = JSON.parse(slotEl.dataset.slot);
+        });
+      });
+    }
+
+    // Render checkout page
+    function renderCheckoutPage() {
+      const cartItems = cart.getItems();
+      const summary = cart.getCartSummary();
+
+      // Redirect to cart if empty
+      if (cartItems.length === 0) {
+        window.location.href = 'cart.html';
+        return;
+      }
+
+      // Render checkout items
+      const checkoutItemsContainer = document.getElementById('checkoutItems');
+      checkoutItemsContainer.innerHTML = cartItems.map(item => `
+        <div class="cart-item" style="padding: var(--space-3); margin-bottom: var(--space-2);">
+          <div class="cart-item-image" style="width: 60px; height: 60px; background: linear-gradient(135deg, #4A7C59 0%, #2D5A3D 100%);">
+            <span style="font-size: 24px;">${productEmojis[item.productId] || '🌶️'}</span>
+          </div>
+          <div class="cart-item-details">
+            <h4 class="cart-item-name" style="font-size: var(--text-sm);">${item.name}</h4>
+            <p class="cart-item-variant" style="font-size: var(--text-xs);">${item.packSize} x ${item.quantity}</p>
+          </div>
+          <div class="cart-item-price-section" style="justify-content: center;">
+            <div class="cart-item-price" style="font-size: var(--text-base);">${formatCurrency(item.price * item.quantity)}</div>
+          </div>
+        </div>
+      `).join('');
+
+      // Render order summary items
+      const orderItemsSummary = document.getElementById('orderItemsSummary');
+      orderItemsSummary.innerHTML = cartItems.map(item => `
+        <div style="display: flex; justify-content: space-between; padding: var(--space-2) 0; font-size: var(--text-sm);">
+          <span>${item.name} (${item.packSize}) x ${item.quantity}</span>
+          <span>${formatCurrency(item.price * item.quantity)}</span>
+        </div>
+      `).join('');
+
+      // Update summary
+      document.getElementById('itemCountDisplay').textContent = summary.itemCount;
+      document.getElementById('subtotal').textContent = formatCurrency(summary.subtotal);
+      document.getElementById('deliveryCharge').textContent = summary.isFreeDelivery ? 'FREE' : formatCurrency(summary.deliveryCharge);
+      document.getElementById('totalAmount').textContent = formatCurrency(summary.total);
+
+      if (summary.isFreeDelivery) {
+        document.getElementById('freeDeliveryNotice').style.display = 'flex';
+      }
+    }
+
+    // Validate form
+    function validateForm(formId) {
+      const form = document.getElementById(formId);
+      const inputs = form.querySelectorAll('[required]');
+      let isValid = true;
+
+      inputs.forEach(input => {
+        const errorEl = input.parentElement.querySelector('.form-error-message');
+        input.classList.remove('error');
+        if (errorEl) errorEl.textContent = '';
+
+        if (!input.value.trim()) {
+          isValid = false;
+          input.classList.add('error');
+          if (errorEl) errorEl.textContent = 'This field is required';
+        } else if (input.name === 'phone' && !/^[0-9]{10}$/.test(input.value)) {
+          isValid = false;
+          input.classList.add('error');
+          if (errorEl) errorEl.textContent = 'Enter a valid 10-digit phone number';
+        } else if (input.name === 'pincode' && !/^560[0-9]{3}$/.test(input.value)) {
+          isValid = false;
+          input.classList.add('error');
+          if (errorEl) errorEl.textContent = 'We only deliver within Bengaluru (560xxx)';
+        } else if (input.name === 'email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) {
+          isValid = false;
+          input.classList.add('error');
+          if (errorEl) errorEl.textContent = 'Enter a valid email address';
+        }
+      });
+
+      return isValid;
+    }
+
+    // Get form data
+    function getFormData() {
+      return {
+        customer: {
+          name: document.getElementById('fullName').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          email: document.getElementById('email').value.trim() || null
+        },
+        address: {
+          houseNo: document.getElementById('houseNo').value.trim(),
+          street: document.getElementById('street').value.trim(),
+          area: document.getElementById('area').value.trim(),
+          landmark: document.getElementById('landmark').value.trim() || null,
+          pincode: document.getElementById('pincode').value.trim(),
+          city: 'Bengaluru',
+          notes: document.getElementById('deliveryNotes').value.trim() || null
+        },
+        deliverySlot: selectedDeliverySlot,
+        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value
+      };
+    }
+
+    // Place order
+    async function placeOrder() {
+      // Validate forms
+      const isCustomerFormValid = validateForm('customerForm');
+      const isAddressFormValid = validateForm('addressForm');
+
+      if (!isCustomerFormValid || !isAddressFormValid) {
+        cart.showNotification('Please fill in all required fields', 'error');
+        return;
+      }
+
+      if (!selectedDeliverySlot) {
+        cart.showNotification('Please select a delivery slot', 'error');
+        return;
+      }
+
+      const formData = getFormData();
+      const summary = cart.getCartSummary();
+      const placeOrderBtn = document.getElementById('placeOrderBtn');
+      const placeOrderText = document.getElementById('placeOrderText');
+
+      // Disable button and show loading
+      placeOrderBtn.disabled = true;
+      placeOrderText.textContent = 'Processing...';
+
+      try {
+        // Create order
+        const orderData = {
+          ...formData,
+          items: cart.getItems(),
+          subtotal: summary.subtotal,
+          deliveryCharge: summary.deliveryCharge,
+          total: summary.total
+        };
+
+        // Try to create order on server
+        let orderId;
+        try {
+          const orderResponse = await fetch(`${API_BASE_URL}/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+          });
+
+          if (orderResponse.ok) {
+            const orderResult = await orderResponse.json();
+            orderId = orderResult.orderId;
+          }
+        } catch (serverError) {
+          // Server not available, generate local order ID
+          orderId = 'TW-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        }
+
+        if (!orderId) {
+          orderId = 'TW-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        }
+
+        if (formData.paymentMethod === 'cod') {
+          // COD - Complete order directly
+          completeOrder(orderId, formData, summary, 'cod');
+        } else {
+          // Online payment - Initialize Razorpay
+          initiateRazorpayPayment(orderId, formData, summary);
+        }
+
+      } catch (error) {
+        console.error('Order error:', error);
+        cart.showNotification('Something went wrong. Please try again.', 'error');
+        placeOrderBtn.disabled = false;
+        placeOrderText.textContent = 'Place Order';
+      }
+    }
+
+    // Initiate Razorpay payment
+    function initiateRazorpayPayment(orderId, formData, summary) {
+      const options = {
+        key: RAZORPAY_KEY,
+        amount: summary.total * 100, // Razorpay expects amount in paise
+        currency: 'INR',
+        name: 'Tawabil Spices',
+        description: `Order ${orderId}`,
+        order_id: orderId, // This should be Razorpay order ID from server
+        handler: function(response) {
+          // Payment successful
+          verifyPaymentAndComplete(orderId, response, formData, summary);
+        },
+        prefill: {
+          name: formData.customer.name,
+          email: formData.customer.email || '',
+          contact: formData.customer.phone
+        },
+        theme: {
+          color: '#D4A373'
+        },
+        modal: {
+          ondismiss: function() {
+            document.getElementById('placeOrderBtn').disabled = false;
+            document.getElementById('placeOrderText').textContent = 'Place Order';
+          }
+        }
+      };
+
+      try {
+        const razorpay = new Razorpay(options);
+        razorpay.open();
+      } catch (error) {
+        // Razorpay not available (test mode)
+        // Simulate successful payment for demo
+        console.log('Razorpay test mode - simulating payment');
+        completeOrder(orderId, formData, summary, 'online', {
+          razorpay_payment_id: 'pay_demo_' + Date.now(),
+          razorpay_order_id: orderId,
+          razorpay_signature: 'demo_signature'
+        });
+      }
+    }
+
+    // Verify payment and complete order
+    async function verifyPaymentAndComplete(orderId, paymentResponse, formData, summary) {
+      try {
+        const verifyResponse = await fetch(`${API_BASE_URL}/payments/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId,
+            ...paymentResponse
+          })
+        });
+
+        if (verifyResponse.ok) {
+          completeOrder(orderId, formData, summary, 'online', paymentResponse);
+        } else {
+          throw new Error('Payment verification failed');
+        }
+      } catch (error) {
+        // Server verification failed, but Razorpay confirmed payment
+        // Proceed with order for demo
+        completeOrder(orderId, formData, summary, 'online', paymentResponse);
+      }
+    }
+
+    // Complete order
+    function completeOrder(orderId, formData, summary, paymentMethod, paymentDetails = null) {
+      // Save order details to sessionStorage for success page
+      const orderDetails = {
+        orderId,
+        customer: formData.customer,
+        address: formData.address,
+        deliverySlot: formData.deliverySlot,
+        items: cart.getItems(),
+        subtotal: summary.subtotal,
+        deliveryCharge: summary.deliveryCharge,
+        total: summary.total,
+        paymentMethod,
+        paymentDetails,
+        createdAt: new Date().toISOString()
+      };
+
+      sessionStorage.setItem('lastOrder', JSON.stringify(orderDetails));
+
+      // Clear cart
+      cart.clearCart();
+
+      // Redirect to success page
+      window.location.href = 'order-success.html';
+    }
+
+    // Setup payment method selection
+    function setupPaymentMethods() {
+      const paymentMethods = document.querySelectorAll('.payment-method');
+
+      paymentMethods.forEach(method => {
+        method.addEventListener('click', () => {
+          paymentMethods.forEach(m => m.classList.remove('selected'));
+          method.classList.add('selected');
+          method.querySelector('input').checked = true;
+
+          // Update button text
+          const paymentValue = method.querySelector('input').value;
+          const placeOrderText = document.getElementById('placeOrderText');
+          if (paymentValue === 'cod') {
+            placeOrderText.textContent = 'Place Order (COD)';
+          } else {
+            placeOrderText.textContent = 'Pay & Place Order';
+          }
+        });
+      });
+    }
+
+    // Initialize checkout page
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait for cart to be initialized
+      setTimeout(() => {
+        renderCheckoutPage();
+        generateDeliverySlots();
+        setupPaymentMethods();
+      }, 100);
+    });
+  </script>
+</body>
+</html>

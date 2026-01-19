@@ -1,0 +1,277 @@
+{
+  "products": [
+    {
+      "id": "cardamom",
+      "name": "Green Cardamom",
+      "nameHindi": "इलायची",
+      "origin": "Kerala, India",
+      "badge": "Premium",
+      "description": "Known as the 'Queen of Spices', our green cardamom is hand-picked from the Western Ghats of Kerala, offering an intense aroma and sweet, floral flavor.",
+      "culinaryUses": [
+        "Biryanis & Pulaos",
+        "Chai & Coffee",
+        "Indian Desserts",
+        "Garam Masala",
+        "Curries"
+      ],
+      "healthBenefits": [
+        "Aids digestion",
+        "Freshens breath",
+        "Antioxidant properties",
+        "Supports heart health"
+      ],
+      "packSizes": ["25g", "50g", "100g", "250g", "500g"],
+      "prices": {
+        "25g": 150,
+        "50g": 280,
+        "100g": 520,
+        "250g": 1200,
+        "500g": 2300
+      },
+      "storageTips": "Store in an airtight container away from heat and light. Use within 6 months for best aroma.",
+      "purityIndicators": [
+        "Deep green color",
+        "Strong aromatic scent",
+        "Plump, unbroken pods",
+        "No artificial coloring"
+      ],
+      "image": "cardamom.jpg"
+    },
+    {
+      "id": "black-pepper",
+      "name": "Black Pepper",
+      "nameHindi": "काली मिर्च",
+      "origin": "Wayanad, Kerala",
+      "badge": "Organic",
+      "description": "The 'King of Spices' from the pristine hills of Wayanad. Our Malabar black pepper is sun-dried naturally, delivering a bold, pungent kick with complex undertones.",
+      "culinaryUses": [
+        "Seasoning",
+        "Marinades",
+        "Soups & Sauces",
+        "Meat dishes",
+        "Salads"
+      ],
+      "healthBenefits": [
+        "Improves digestion",
+        "Anti-inflammatory",
+        "Enhances nutrient absorption",
+        "Rich in piperine"
+      ],
+      "packSizes": ["50g", "100g", "250g", "500g", "1kg"],
+      "prices": {
+        "50g": 80,
+        "100g": 150,
+        "250g": 350,
+        "500g": 680,
+        "1kg": 1300
+      },
+      "storageTips": "Keep in a cool, dry place. Grind fresh for maximum flavor. Whole peppercorns last up to 3 years.",
+      "purityIndicators": [
+        "Uniform dark color",
+        "Wrinkled texture",
+        "Strong pungent aroma",
+        "Dense, heavy corns"
+      ],
+      "image": "black-pepper.jpg"
+    },
+    {
+      "id": "cloves",
+      "name": "Cloves",
+      "nameHindi": "लौंग",
+      "origin": "Tamil Nadu, India",
+      "badge": "Premium",
+      "description": "Aromatic flower buds harvested from the clove tree. Our cloves are carefully selected for their high essential oil content, providing intense flavor and fragrance.",
+      "culinaryUses": [
+        "Biryanis",
+        "Meat preparations",
+        "Pickles",
+        "Garam Masala",
+        "Hot beverages"
+      ],
+      "healthBenefits": [
+        "Natural antiseptic",
+        "Relieves toothache",
+        "Aids digestion",
+        "Rich in antioxidants"
+      ],
+      "packSizes": ["25g", "50g", "100g", "250g"],
+      "prices": {
+        "25g": 120,
+        "50g": 220,
+        "100g": 420,
+        "250g": 980
+      },
+      "storageTips": "Store whole cloves in airtight containers. Keeps well for up to 2 years when stored properly.",
+      "purityIndicators": [
+        "Reddish-brown color",
+        "Oil release when pressed",
+        "Strong clove aroma",
+        "Intact flower buds"
+      ],
+      "image": "cloves.jpg"
+    },
+    {
+      "id": "cinnamon",
+      "name": "Cinnamon Sticks",
+      "nameHindi": "दालचीनी",
+      "origin": "Sri Lanka & Kerala",
+      "badge": "Ceylon",
+      "description": "True Ceylon cinnamon, known for its delicate, sweet flavor. Our cinnamon sticks are carefully rolled and dried, perfect for both sweet and savory dishes.",
+      "culinaryUses": [
+        "Desserts & Baking",
+        "Curries",
+        "Rice dishes",
+        "Hot drinks",
+        "Fruit compotes"
+      ],
+      "healthBenefits": [
+        "Regulates blood sugar",
+        "Anti-inflammatory",
+        "Antioxidant rich",
+        "Supports metabolism"
+      ],
+      "packSizes": ["50g", "100g", "250g"],
+      "prices": {
+        "50g": 90,
+        "100g": 170,
+        "250g": 400
+      },
+      "storageTips": "Keep in a cool, dark place. Whole sticks maintain flavor longer than ground cinnamon.",
+      "purityIndicators": [
+        "Light tan color",
+        "Thin, papery layers",
+        "Sweet, mild aroma",
+        "Easily breakable"
+      ],
+      "image": "cinnamon.jpg"
+    },
+    {
+      "id": "zeera",
+      "name": "Cumin Seeds (Zeera)",
+      "nameHindi": "जीरा",
+      "origin": "Rajasthan & Gujarat",
+      "badge": "Freshest",
+      "description": "Premium quality cumin seeds with an earthy, warm flavor. Our zeera is sourced from the finest farms of Rajasthan, essential for authentic Indian cooking.",
+      "culinaryUses": [
+        "Tempering (Tadka)",
+        "Curries & Dals",
+        "Rice dishes",
+        "Raita",
+        "Spice blends"
+      ],
+      "healthBenefits": [
+        "Aids digestion",
+        "Rich in iron",
+        "Boosts immunity",
+        "Improves metabolism"
+      ],
+      "packSizes": ["50g", "100g", "250g", "500g", "1kg"],
+      "prices": {
+        "50g": 60,
+        "100g": 110,
+        "250g": 260,
+        "500g": 500,
+        "1kg": 950
+      },
+      "storageTips": "Store in airtight containers. Toast lightly before grinding for enhanced flavor.",
+      "purityIndicators": [
+        "Light brown color",
+        "Elongated shape",
+        "Strong earthy aroma",
+        "Uniform size"
+      ],
+      "image": "cumin.jpg"
+    }
+  ],
+  "config": {
+    "deliveryCharge": 40,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "minOrderAmount": 200,
+    "freeDeliveryAbove": 500
+  },
+  "testimonials": [
+    {
+      "id": 1,
+      "name": "Priya Sharma",
+      "role": "Home Chef, Koramangala",
+      "rating": 5,
+      "text": "The cardamom from Tawabil is simply outstanding! The aroma is so intense that I use half the quantity I normally would. My chai has never tasted better!",
+      "initials": "PS"
+    },
+    {
+      "id": 2,
+      "name": "Chef Rajesh Kumar",
+      "role": "Executive Chef, Taj Hotel",
+      "rating": 5,
+      "text": "As a professional chef, I need consistent quality. Tawabil delivers premium spices that elevate every dish. Their black pepper is the best I've used.",
+      "initials": "RK"
+    },
+    {
+      "id": 3,
+      "name": "Meera Nair",
+      "role": "Restaurant Owner, Indiranagar",
+      "rating": 5,
+      "text": "Switched to Tawabil for our restaurant 6 months ago. Our customers noticed the difference immediately. The freshness is unmatched!",
+      "initials": "MN"
+    },
+    {
+      "id": 4,
+      "name": "Anand Krishnamurthy",
+      "role": "Cloud Kitchen, HSR Layout",
+      "rating": 5,
+      "text": "Reliable quality, consistent delivery, and fair pricing. Tawabil has become our trusted spice partner for all our kitchen needs.",
+      "initials": "AK"
+    }
+  ],
+  "stats": [
+    {
+      "number": "10+",
+      "label": "Years of Trust"
+    },
+    {
+      "number": "5000+",
+      "label": "Happy Customers"
+    },
+    {
+      "number": "100%",
+      "label": "Pure Quality"
+    },
+    {
+      "number": "50+",
+      "label": "Restaurant Partners"
+    }
+  ],
+  "features": [
+    {
+      "icon": "leaf",
+      "title": "100% Natural",
+      "description": "No artificial colors, preservatives, or additives. Pure spices as nature intended."
+    },
+    {
+      "icon": "shield-check",
+      "title": "Quality Assured",
+      "description": "FSSAI certified with rigorous quality testing at every stage."
+    },
+    {
+      "icon": "truck",
+      "title": "Fresh Delivery",
+      "description": "Farm to kitchen freshness. Quick delivery across Bengaluru."
+    },
+    {
+      "icon": "award",
+      "title": "Premium Sourcing",
+      "description": "Direct from trusted farmers in Kerala, Tamil Nadu & Rajasthan."
+    },
+    {
+      "icon": "package",
+      "title": "Secure Packaging",
+      "description": "Airtight packaging that preserves aroma and freshness longer."
+    },
+    {
+      "icon": "heart",
+      "title": "Customer First",
+      "description": "Dedicated support and 100% satisfaction guarantee."
+    }
+  ]
+}

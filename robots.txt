@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tawabil.com/sitemap.xml
