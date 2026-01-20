@@ -3,10 +3,14 @@
 ======================================== */
 
 // ----------------------------------------
-// WHATSAPP CONFIGURATION
+// WHATSAPP CONFIGURATION (uses config.js as single source of truth)
 // ----------------------------------------
-const WHATSAPP_NUMBER = '919901888305'; // Replace with actual number
-const WHATSAPP_DEFAULT_MESSAGE = 'Hi Tawabil! I\'m interested in your premium spices. Please share details.';
+function getWhatsAppNumber() {
+    return window.TawabilConfig?.whatsapp?.number || '919901888305';
+}
+function getWhatsAppDefaultMessage() {
+    return window.TawabilConfig?.whatsapp?.defaultMessage || "Hi Tawabil! I'm interested in your premium spices. Please share details.";
+}
 
 // ----------------------------------------
 // NAVIGATION FUNCTIONALITY
@@ -45,8 +49,9 @@ document.querySelectorAll('.mobile-menu-links a').forEach(link => {
 // ----------------------------------------
 // WHATSAPP FUNCTIONS
 // ----------------------------------------
-function openWhatsApp(message = WHATSAPP_DEFAULT_MESSAGE) {
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+function openWhatsApp(message) {
+    const finalMessage = message || getWhatsAppDefaultMessage();
+    const url = `https://wa.me/${getWhatsAppNumber()}?text=${encodeURIComponent(finalMessage)}`;
     window.open(url, '_blank');
 }
 
@@ -284,7 +289,7 @@ function isValidPhone(phone) {
 // ----------------------------------------
 // FORM HANDLERS (WHATSAPP INTEGRATION)
 // ----------------------------------------
-const whatsappNumber = "919876543210"; // Replace with actual number
+// WhatsApp number from config (single source of truth)
 
 // Bulk Order Form Handler
 const bulkOrderForm = document.getElementById('bulkOrderForm');
@@ -331,7 +336,7 @@ if (bulkOrderForm) {
 
         // Open WhatsApp
         const encodedMessage = encodeURIComponent(waMessage);
-        window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+        window.open(`https://wa.me/${getWhatsAppNumber()}?text=${encodedMessage}`, '_blank');
 
         // Reset form and show success
         this.reset();
@@ -360,7 +365,7 @@ if (contactForm) {
         waMessage += `*Message:* ${message}\n`;
 
         const encodedMessage = encodeURIComponent(waMessage);
-        window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+        window.open(`https://wa.me/${getWhatsAppNumber()}?text=${encodedMessage}`, '_blank');
 
         this.reset();
         showFormSuccess(this);

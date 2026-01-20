@@ -9,15 +9,20 @@ const Order = require('../models/Order');
 // Razorpay configuration
 let Razorpay;
 let razorpayInstance;
+let isRazorpayConfigured = false;
 
 try {
-    Razorpay = require('razorpay');
-    razorpayInstance = new Razorpay({
-        key_id: process.env.RAZORPAY_KEY_ID,
-        key_secret: process.env.RAZORPAY_KEY_SECRET
-    });
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        Razorpay = require('razorpay');
+        razorpayInstance = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET
+        });
+        isRazorpayConfigured = true;
+    }
 } catch (error) {
-    console.warn('Razorpay not configured. Payment features will be limited.');
+    // Razorpay initialization failed - online payments will be disabled
+    isRazorpayConfigured = false;
 }
 
 /**
@@ -54,17 +59,11 @@ exports.createRazorpayOrder = async (req, res) => {
         }
 
         // Check if Razorpay is configured
-        if (!razorpayInstance) {
-            // Return mock order for development
-            return res.status(200).json({
-                success: true,
-                data: {
-                    id: `order_demo_${Date.now()}`,
-                    amount: amount * 100,
-                    currency: 'INR',
-                    receipt: orderId,
-                    status: 'created'
-                }
+        if (!isRazorpayConfigured || !razorpayInstance) {
+            // SECURITY: Do not allow online payments without proper Razorpay configuration
+            return res.status(503).json({
+                success: false,
+                message: 'Online payment is currently unavailable. Please use Cash on Delivery.'
             });
         }
 
@@ -94,7 +93,8 @@ exports.createRazorpayOrder = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error creating Razorpay order:', error);
+        // Error logged for debugging
+        process.env.NODE_ENV !== 'production' && console.error('Error creating Razorpay order:', error);
         res.status(500).json({
             success: false,
             message: 'Error creating payment order'
@@ -125,19 +125,11 @@ exports.verifyPayment = async (req, res) => {
             });
         }
 
-        // Skip signature verification if Razorpay not configured (development mode)
+        // SECURITY: Require Razorpay configuration for payment verification
         if (!process.env.RAZORPAY_KEY_SECRET) {
-            // Mark as paid for demo purposes
-            await order.markAsPaid(razorpay_payment_id || 'demo_payment', razorpay_signature || 'demo_signature');
-
-            return res.status(200).json({
-                success: true,
-                message: 'Payment verified (demo mode)',
-                data: {
-                    orderId: order.orderId,
-                    paymentStatus: order.paymentStatus,
-                    status: order.status
-                }
+            return res.status(503).json({
+                success: false,
+                message: 'Payment verification unavailable. Please contact support.'
             });
         }
 
@@ -172,7 +164,8 @@ exports.verifyPayment = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error verifying payment:', error);
+        // Error logged for debugging
+        process.env.NODE_ENV !== 'production' && console.error('Error verifying payment:', error);
         res.status(500).json({
             success: false,
             message: 'Error verifying payment'
@@ -188,19 +181,33 @@ exports.handleWebhook = async (req, res) => {
     try {
         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-        // Skip verification if webhook secret not configured
-        if (webhookSecret) {
-            const signature = req.headers['x-razorpay-signature'];
+        // SECURITY: Require webhook secret for production
+        if (!webhookSecret) {
+            return res.status(503).json({
+                success: false,
+                message: 'Webhook not configured'
+            });
+        }
 
-            const expectedSignature = crypto
-                .createHmac('sha256', webhookSecret)
-                .update(JSON.stringify(req.body))
-                .digest('hex');
+        const signature = req.headers['x-razorpay-signature'];
 
-            if (signature !== expectedSignature) {
-                console.warn('Invalid webhook signature');
-                return res.status(400).json({ success: false });
-            }
+        if (!signature) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing signature'
+            });
+        }
+
+        const expectedSignature = crypto
+            .createHmac('sha256', webhookSecret)
+            .update(JSON.stringify(req.body))
+            .digest('hex');
+
+        if (signature !== expectedSignature) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid signature'
+            });
         }
 
         const event = req.body;
@@ -220,13 +227,15 @@ exports.handleWebhook = async (req, res) => {
                 break;
 
             default:
-                console.log('Unhandled webhook event:', event.event);
+                // Unhandled event type - logged in development only
+                break;
         }
 
         res.status(200).json({ success: true });
 
     } catch (error) {
-        console.error('Error handling webhook:', error);
+        // Error logged for debugging
+        process.env.NODE_ENV !== 'production' && console.error('Error handling webhook:', error);
         res.status(500).json({ success: false });
     }
 };
@@ -243,10 +252,10 @@ async function handlePaymentCaptured(payment) {
             order.paymentStatus = 'paid';
             order.status = 'confirmed';
             await order.save();
-            console.log(`Order ${order.orderId} payment confirmed via webhook`);
         }
     } catch (error) {
-        console.error('Error handling payment.captured:', error);
+        // Error logged for debugging
+        process.env.NODE_ENV !== 'production' && console.error('Error handling payment.captured:', error);
     }
 }
 
@@ -259,10 +268,10 @@ async function handlePaymentFailed(payment) {
         if (order) {
             order.paymentStatus = 'failed';
             await order.save();
-            console.log(`Order ${order.orderId} payment failed`);
         }
     } catch (error) {
-        console.error('Error handling payment.failed:', error);
+        // Error logged for debugging
+        process.env.NODE_ENV !== 'production' && console.error('Error handling payment.failed:', error);
     }
 }
 
@@ -275,9 +284,9 @@ async function handleRefundProcessed(refund) {
         if (order) {
             order.paymentStatus = 'refunded';
             await order.updateStatus('cancelled', 'Refund processed');
-            console.log(`Order ${order.orderId} refunded`);
         }
     } catch (error) {
-        console.error('Error handling refund.processed:', error);
+        // Error logged for debugging
+        process.env.NODE_ENV !== 'production' && console.error('Error handling refund.processed:', error);
     }
 }

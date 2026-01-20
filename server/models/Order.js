@@ -206,14 +206,20 @@ orderSchema.methods.markAsPaid = function(paymentId, signature) {
     return this.save();
 };
 
-// Static method to generate order ID
+// Static method to generate order ID (collision-resistant)
 orderSchema.statics.generateOrderId = function() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = 'TW-';
+    // Use timestamp + random string for uniqueness
+    // Format: TW-YYMMDD-XXXXXX (e.g., TW-260120-A3F2K9)
+    const now = new Date();
+    const dateStr = now.toISOString().slice(2, 10).replace(/-/g, '');
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed confusing chars: 0,O,1,I
+    let randomPart = '';
+    const crypto = require('crypto');
+    const randomBytes = crypto.randomBytes(6);
     for (let i = 0; i < 6; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        randomPart += chars.charAt(randomBytes[i] % chars.length);
     }
-    return result;
+    return `TW-${dateStr}-${randomPart}`;
 };
 
 // Static method to find orders by phone

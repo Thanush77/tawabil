@@ -5,9 +5,13 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server/server.js"
+    "dev": "nodemon server/server.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --coverage --reporters=default --reporters=jest-junit"
   },
   "dependencies": {
+    "@sentry/node": "^7.100.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -17,5 +21,29 @@
     "mongoose": "^8.0.3",
     "razorpay": "^2.9.2",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "mongodb-memory-server": "^9.1.6",
+    "supertest": "^6.3.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "server/**/*.js",
+      "!server/node_modules/**"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ],
+    "testTimeout": 30000,
+    "maxWorkers": 1,
+    "forceExit": true,
+    "verbose": true
   }
 }

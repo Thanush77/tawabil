@@ -10,6 +10,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/db');
+const { initSentry, captureError } = require('./config/sentry');
 
 // Import routes
 const productRoutes = require('./routes/products');
@@ -19,6 +20,12 @@ const paymentRoutes = require('./routes/payments');
 
 // Initialize Express app
 const app = express();
+
+// Initialize Sentry (must be first)
+const sentry = initSentry(app);
+
+// Sentry request handler (must be first middleware)
+app.use(sentry.requestHandler);
 
 // Connect to MongoDB
 connectDB();
@@ -70,9 +77,26 @@ app.use((req, res) => {
     });
 });
 
+// Sentry error handler (must be before custom error handler)
+app.use(sentry.errorHandler);
+
 // Global error handler
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
+    // Log error in development
+    if (process.env.NODE_ENV !== 'production') {
+        console.error('Error:', err);
+    }
+
+    // Capture error to Sentry for 500 errors
+    if (!err.status || err.status >= 500) {
+        captureError(err, {
+            extra: {
+                path: req.path,
+                method: req.method,
+                body: req.body
+            }
+        });
+    }
 
     // Mongoose validation error
     if (err.name === 'ValidationError') {
@@ -95,7 +119,9 @@ app.use((err, req, res, next) => {
     // Default error response
     res.status(err.status || 500).json({
         success: false,
-        message: err.message || 'Internal server error'
+        message: process.env.NODE_ENV === 'production'
+            ? 'Internal server error'
+            : err.message || 'Internal server error'
     });
 });
 

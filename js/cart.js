@@ -3,14 +3,42 @@
 ======================================== */
 
 // ----------------------------------------
-// CONFIGURATION
+// CONFIGURATION (uses config.js)
 // ----------------------------------------
 const CART_STORAGE_KEY = 'tawabil_cart';
 const SAVED_ITEMS_KEY = 'tawabil_saved';
-const API_BASE_URL = 'http://localhost:5000/api';
-const DELIVERY_CHARGE = 40;
-const FREE_DELIVERY_ABOVE = 500;
-const MIN_ORDER_AMOUNT = 200;
+
+// Get API URL from config (fallback for safety)
+function getCartApiUrl() {
+    if (window.TawabilConfig && window.TawabilConfig.baseUrl) {
+        return window.TawabilConfig.baseUrl;
+    }
+    // Fallback: detect environment
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isLocal ? 'http://localhost:5000/api' : '/api';
+}
+
+// Business rules from config or defaults
+const DELIVERY_CHARGE = (window.TawabilConfig?.business?.deliveryCharge) || 40;
+const FREE_DELIVERY_ABOVE = (window.TawabilConfig?.business?.freeDeliveryAbove) || 500;
+const MIN_ORDER_AMOUNT = (window.TawabilConfig?.business?.minOrderAmount) || 200;
+
+// ----------------------------------------
+// SECURITY: HTML Sanitization helper
+// ----------------------------------------
+function sanitizeHTML(str) {
+    if (typeof str !== 'string') return str;
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// Development-only logging helper
+function logError(message, error) {
+    if (window.TawabilConfig?.isDevelopment) {
+        logError(message, error);
+    }
+}
 
 // ----------------------------------------
 // CART MANAGER CLASS
@@ -34,7 +62,7 @@ class CartManager {
     async loadProducts() {
         try {
             // Try backend API first
-            const response = await fetch(`${API_BASE_URL}/products`, {
+            const response = await fetch(`${getCartApiUrl()}/products`, {
                 headers: { 'Accept': 'application/json' }
             });
             if (response.ok) {
@@ -53,7 +81,7 @@ class CartManager {
                 this.isBackendAvailable = false;
                 return this.products;
             } catch (jsonError) {
-                console.error('Error loading products:', jsonError);
+                logError('Error loading products:', jsonError);
                 this.isBackendAvailable = false;
                 return [];
             }
@@ -71,7 +99,7 @@ class CartManager {
             const stored = localStorage.getItem(CART_STORAGE_KEY);
             return stored ? JSON.parse(stored) : [];
         } catch (error) {
-            console.error('Error loading cart:', error);
+            logError('Error loading cart:', error);
             return [];
         }
     }
@@ -82,7 +110,7 @@ class CartManager {
             localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.cart));
             this.notifyListeners();
         } catch (error) {
-            console.error('Error saving cart:', error);
+            logError('Error saving cart:', error);
         }
     }
 
@@ -92,7 +120,7 @@ class CartManager {
             const stored = localStorage.getItem(SAVED_ITEMS_KEY);
             return stored ? JSON.parse(stored) : [];
         } catch (error) {
-            console.error('Error loading saved items:', error);
+            logError('Error loading saved items:', error);
             return [];
         }
     }
@@ -103,7 +131,7 @@ class CartManager {
             localStorage.setItem(SAVED_ITEMS_KEY, JSON.stringify(this.savedItems));
             this.notifyListeners();
         } catch (error) {
-            console.error('Error saving saved items:', error);
+            logError('Error saving saved items:', error);
         }
     }
 
@@ -116,13 +144,13 @@ class CartManager {
     addItem(productId, packSize, quantity = 1) {
         const product = this.getProduct(productId);
         if (!product) {
-            console.error('Product not found:', productId);
+            logError('Product not found:', productId);
             return false;
         }
 
         const price = product.prices[packSize];
         if (!price) {
-            console.error('Price not found for pack size:', packSize);
+            logError('Price not found for pack size:', packSize);
             return false;
         }
 
@@ -354,10 +382,10 @@ class CartManager {
         if (miniCartContent) miniCartContent.style.display = 'block';
 
         miniCartContainer.innerHTML = this.cart.slice(0, 3).map(item => `
-            <div class="mini-cart-item" data-item-id="${item.id}">
+            <div class="mini-cart-item" data-item-id="${sanitizeHTML(item.id)}">
                 <div class="mini-cart-item-info">
-                    <span class="mini-cart-item-name">${item.name}</span>
-                    <span class="mini-cart-item-details">${item.packSize} x ${item.quantity}</span>
+                    <span class="mini-cart-item-name">${sanitizeHTML(item.name)}</span>
+                    <span class="mini-cart-item-details">${sanitizeHTML(item.packSize)} x ${parseInt(item.quantity, 10)}</span>
                 </div>
                 <span class="mini-cart-item-price">${formatCurrency(item.price * item.quantity)}</span>
             </div>
@@ -389,7 +417,7 @@ class CartManager {
                     ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
                     : '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'}
             </svg>
-            <span>${message}</span>
+            <span>${sanitizeHTML(message)}</span>
         `;
 
         document.body.appendChild(notification);
@@ -422,7 +450,7 @@ class CartManager {
     // Validate cart with server
     async validateCart() {
         try {
-            const response = await fetch(`${API_BASE_URL}/cart/validate`, {
+            const response = await fetch(`${getCartApiUrl()}/cart/validate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -437,7 +465,7 @@ class CartManager {
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error('Error validating cart:', error);
+            logError('Error validating cart:', error);
             // Return local calculation if server is unavailable
             return {
                 valid: true,
@@ -450,7 +478,7 @@ class CartManager {
     // Sync cart with server (for logged-in users in future)
     async syncWithServer() {
         try {
-            const response = await fetch(`${API_BASE_URL}/cart/sync`, {
+            const response = await fetch(`${getCartApiUrl()}/cart/sync`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -467,7 +495,7 @@ class CartManager {
 
             return await response.json();
         } catch (error) {
-            console.error('Error syncing cart:', error);
+            logError('Error syncing cart:', error);
             return null;
         }
     }
@@ -496,7 +524,7 @@ class CartManager {
         };
 
         try {
-            const response = await fetch(`${API_BASE_URL}/orders`, {
+            const response = await fetch(`${getCartApiUrl()}/orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -512,7 +540,7 @@ class CartManager {
             const order = await response.json();
             return order;
         } catch (error) {
-            console.error('Error creating order:', error);
+            logError('Error creating order:', error);
             throw error;
         }
     }
@@ -520,7 +548,7 @@ class CartManager {
     // Create Razorpay payment order
     async createPaymentOrder(orderId, amount) {
         try {
-            const response = await fetch(`${API_BASE_URL}/payments/create-order`, {
+            const response = await fetch(`${getCartApiUrl()}/payments/create-order`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -537,7 +565,7 @@ class CartManager {
 
             return await response.json();
         } catch (error) {
-            console.error('Error creating payment order:', error);
+            logError('Error creating payment order:', error);
             throw error;
         }
     }
@@ -545,7 +573,7 @@ class CartManager {
     // Verify payment with backend
     async verifyPayment(paymentData) {
         try {
-            const response = await fetch(`${API_BASE_URL}/payments/verify`, {
+            const response = await fetch(`${getCartApiUrl()}/payments/verify`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -559,7 +587,7 @@ class CartManager {
 
             return await response.json();
         } catch (error) {
-            console.error('Error verifying payment:', error);
+            logError('Error verifying payment:', error);
             throw error;
         }
     }
@@ -572,13 +600,13 @@ class CartManager {
     // Get order by ID
     async getOrder(orderId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+            const response = await fetch(`${getCartApiUrl()}/orders/${orderId}`);
             if (!response.ok) {
                 throw new Error('Order not found');
             }
             return await response.json();
         } catch (error) {
-            console.error('Error fetching order:', error);
+            logError('Error fetching order:', error);
             return null;
         }
     }

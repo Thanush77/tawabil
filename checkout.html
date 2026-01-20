@@ -289,12 +289,28 @@
   </a>
 
   <!-- Scripts -->
+  <script src="js/config.js"></script>
   <script src="js/main.js"></script>
   <script src="js/cart.js"></script>
   <script>
-    // Constants
-    const API_BASE_URL = 'http://localhost:5000/api';
-    const RAZORPAY_KEY = 'rzp_test_xxxxx'; // Replace with actual key
+    // Get API URL from config (environment-aware)
+    function getApiBaseUrl() {
+        if (window.TawabilConfig && window.TawabilConfig.baseUrl) {
+            return window.TawabilConfig.baseUrl;
+        }
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        return isLocal ? 'http://localhost:5000/api' : '/api';
+    }
+
+    // Get Razorpay key from config (must be set in production environment)
+    function getRazorpayKey() {
+        if (window.TawabilConfig && window.TawabilConfig.razorpayKey) {
+            return window.TawabilConfig.razorpayKey;
+        }
+        return ''; // Empty = COD only mode
+    }
+
+    const API_BASE_URL = getApiBaseUrl();
 
     // Product emoji mapping
     const productEmojis = {
@@ -539,16 +555,52 @@
     }
 
     // Initiate Razorpay payment
-    function initiateRazorpayPayment(orderId, formData, summary) {
+    async function initiateRazorpayPayment(orderId, formData, summary) {
+      const razorpayKey = getRazorpayKey();
+      const placeOrderBtn = document.getElementById('placeOrderBtn');
+      const placeOrderText = document.getElementById('placeOrderText');
+
+      // Check if Razorpay is configured
+      if (!razorpayKey) {
+        cart.showNotification('Online payment is not available. Please use Cash on Delivery.', 'error');
+        placeOrderBtn.disabled = false;
+        placeOrderText.textContent = 'Place Order';
+        return;
+      }
+
+      // First, create a Razorpay order on the server
+      let razorpayOrderId;
+      try {
+        const orderResponse = await fetch(`${API_BASE_URL}/payments/create-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: orderId,
+            amount: summary.total
+          })
+        });
+
+        if (!orderResponse.ok) {
+          throw new Error('Failed to create payment order');
+        }
+
+        const orderData = await orderResponse.json();
+        razorpayOrderId = orderData.data.id;
+      } catch (error) {
+        cart.showNotification('Unable to initialize payment. Please try again.', 'error');
+        placeOrderBtn.disabled = false;
+        placeOrderText.textContent = 'Place Order';
+        return;
+      }
+
       const options = {
-        key: RAZORPAY_KEY,
-        amount: summary.total * 100, // Razorpay expects amount in paise
+        key: razorpayKey,
+        amount: summary.total * 100,
         currency: 'INR',
         name: 'Tawabil Spices',
         description: `Order ${orderId}`,
-        order_id: orderId, // This should be Razorpay order ID from server
+        order_id: razorpayOrderId,
         handler: function(response) {
-          // Payment successful
           verifyPaymentAndComplete(orderId, response, formData, summary);
         },
         prefill: {
@@ -561,8 +613,8 @@
         },
         modal: {
           ondismiss: function() {
-            document.getElementById('placeOrderBtn').disabled = false;
-            document.getElementById('placeOrderText').textContent = 'Place Order';
+            placeOrderBtn.disabled = false;
+            placeOrderText.textContent = 'Place Order';
           }
         }
       };
@@ -571,19 +623,17 @@
         const razorpay = new Razorpay(options);
         razorpay.open();
       } catch (error) {
-        // Razorpay not available (test mode)
-        // Simulate successful payment for demo
-        console.log('Razorpay test mode - simulating payment');
-        completeOrder(orderId, formData, summary, 'online', {
-          razorpay_payment_id: 'pay_demo_' + Date.now(),
-          razorpay_order_id: orderId,
-          razorpay_signature: 'demo_signature'
-        });
+        cart.showNotification('Payment gateway unavailable. Please use Cash on Delivery.', 'error');
+        placeOrderBtn.disabled = false;
+        placeOrderText.textContent = 'Place Order';
       }
     }
 
     // Verify payment and complete order
     async function verifyPaymentAndComplete(orderId, paymentResponse, formData, summary) {
+      const placeOrderBtn = document.getElementById('placeOrderBtn');
+      const placeOrderText = document.getElementById('placeOrderText');
+
       try {
         const verifyResponse = await fetch(`${API_BASE_URL}/payments/verify`, {
           method: 'POST',
@@ -597,12 +647,20 @@
         if (verifyResponse.ok) {
           completeOrder(orderId, formData, summary, 'online', paymentResponse);
         } else {
-          throw new Error('Payment verification failed');
+          const errorData = await verifyResponse.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Payment verification failed');
         }
       } catch (error) {
-        // Server verification failed, but Razorpay confirmed payment
-        // Proceed with order for demo
-        completeOrder(orderId, formData, summary, 'online', paymentResponse);
+        // SECURITY: Do NOT proceed with order if payment verification fails
+        // This prevents fraudulent orders
+        cart.showNotification('Payment verification failed. Please try again or contact support.', 'error');
+        placeOrderBtn.disabled = false;
+        placeOrderText.textContent = 'Place Order';
+
+        // Log for debugging (will be removed in production build)
+        if (window.TawabilConfig?.isDevelopment) {
+          console.warn('Payment verification error:', error.message);
+        }
       }
     }
 
