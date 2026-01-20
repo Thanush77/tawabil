@@ -1,14 +1,10 @@
 {
-    "version": 2,
-    "functions": {
-        "server/server.js": {
-            "maxDuration": 10
-        }
-    },
+    "buildCommand": "",
+    "outputDirectory": ".",
     "rewrites": [
         {
-            "source": "/api/(.*)",
-            "destination": "/server/server.js"
+            "source": "/api/:path*",
+            "destination": "/api/index.js"
         }
     ]
 }
