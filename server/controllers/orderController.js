@@ -1,10 +1,10 @@
 /**
  * Order Controller
  * Handles order creation and management
+ * Using Prisma for database operations
  */
 
-const Order = require('../models/Order');
-const Customer = require('../models/Customer');
+const { prisma, generateOrderId } = require('../config/prisma');
 const { getProductPrice } = require('./productController');
 
 // Configuration
@@ -57,57 +57,47 @@ exports.createOrder = async (req, res) => {
         const total = subtotal + deliveryCharge;
 
         // Generate order ID
-        const orderId = Order.generateOrderId();
+        const orderId = generateOrderId();
 
-        // Create order
-        const order = new Order({
-            orderId,
-            customer: {
-                name: customer.name,
-                phone: customer.phone,
-                email: customer.email || undefined
-            },
-            address,
-            items: validatedItems,
-            subtotal,
-            deliveryCharge,
-            total,
-            paymentMethod,
-            paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending',
-            status: paymentMethod === 'cod' ? 'confirmed' : 'pending',
-            deliverySlot,
-            statusHistory: [{
-                status: paymentMethod === 'cod' ? 'confirmed' : 'pending',
-                timestamp: new Date()
-            }]
+        // Determine initial status based on payment method
+        const initialStatus = paymentMethod === 'cod' ? 'CONFIRMED' : 'PENDING';
+        const paymentStatus = 'PENDING';
+
+        // Find or create customer
+        let customerRecord = await prisma.customer.findUnique({
+            where: { phone: customer.phone }
         });
 
-        await order.save();
-
-        // Create or update customer record
-        try {
-            const customerRecord = await Customer.findOrCreate(
-                customer.phone,
-                customer.name,
-                customer.email
-            );
-
-            // Add address if not exists
-            const addressExists = customerRecord.addresses.some(
-                addr => addr.pincode === address.pincode &&
-                        addr.houseNo === address.houseNo
-            );
-
-            if (!addressExists) {
-                await customerRecord.addAddress(address);
-            }
-
-            // Record order
-            await customerRecord.recordOrder(order._id, total);
-        } catch (customerError) {
-            // Non-critical error, log but don't fail order
-            console.error('Error updating customer record:', customerError);
+        if (!customerRecord) {
+            customerRecord = await prisma.customer.create({
+                data: {
+                    name: customer.name,
+                    phone: customer.phone,
+                    email: customer.email || null
+                }
+            });
         }
+
+        // Create order with Prisma
+        const order = await prisma.order.create({
+            data: {
+                orderId,
+                customerId: customerRecord.id,
+                address: address,
+                items: validatedItems,
+                subtotal,
+                deliveryCharge,
+                total,
+                paymentMethod: paymentMethod === 'cod' ? 'COD' : 'ONLINE',
+                paymentStatus,
+                status: initialStatus,
+                deliverySlot: deliverySlot || null,
+                statusHistory: [{
+                    status: initialStatus,
+                    timestamp: new Date().toISOString()
+                }]
+            }
+        });
 
         res.status(201).json({
             success: true,
@@ -139,7 +129,10 @@ exports.getOrder = async (req, res) => {
     try {
         const { orderId } = req.params;
 
-        const order = await Order.findOne({ orderId });
+        const order = await prisma.order.findUnique({
+            where: { orderId },
+            include: { customer: true }
+        });
 
         if (!order) {
             return res.status(404).json({
@@ -171,7 +164,9 @@ exports.cancelOrder = async (req, res) => {
         const { orderId } = req.params;
         const { reason } = req.body;
 
-        const order = await Order.findOne({ orderId });
+        const order = await prisma.order.findUnique({
+            where: { orderId }
+        });
 
         if (!order) {
             return res.status(404).json({
@@ -181,7 +176,7 @@ exports.cancelOrder = async (req, res) => {
         }
 
         // Check if order can be cancelled
-        const cancellableStatuses = ['pending', 'confirmed'];
+        const cancellableStatuses = ['PENDING', 'CONFIRMED'];
         if (!cancellableStatuses.includes(order.status)) {
             return res.status(400).json({
                 success: false,
@@ -190,14 +185,27 @@ exports.cancelOrder = async (req, res) => {
         }
 
         // Update order status
-        await order.updateStatus('cancelled', reason || 'Cancelled by customer');
+        const statusHistory = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+        statusHistory.push({
+            status: 'CANCELLED',
+            timestamp: new Date().toISOString(),
+            note: reason || 'Cancelled by customer'
+        });
+
+        const updatedOrder = await prisma.order.update({
+            where: { orderId },
+            data: {
+                status: 'CANCELLED',
+                statusHistory
+            }
+        });
 
         res.status(200).json({
             success: true,
             message: 'Order cancelled successfully',
             data: {
-                orderId: order.orderId,
-                status: order.status
+                orderId: updatedOrder.orderId,
+                status: updatedOrder.status
             }
         });
 
@@ -226,7 +234,24 @@ exports.getOrdersByPhone = async (req, res) => {
             });
         }
 
-        const orders = await Order.findByPhone(phone);
+        // Find customer first
+        const customer = await prisma.customer.findUnique({
+            where: { phone }
+        });
+
+        if (!customer) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                data: []
+            });
+        }
+
+        // Get orders for customer
+        const orders = await prisma.order.findMany({
+            where: { customerId: customer.id },
+            orderBy: { createdAt: 'desc' }
+        });
 
         res.status(200).json({
             success: true,
@@ -235,7 +260,7 @@ exports.getOrdersByPhone = async (req, res) => {
                 orderId: order.orderId,
                 status: order.status,
                 total: order.total,
-                itemCount: order.items.length,
+                itemCount: Array.isArray(order.items) ? order.items.length : 0,
                 createdAt: order.createdAt,
                 deliverySlot: order.deliverySlot
             }))

@@ -1,10 +1,11 @@
 /**
  * Payment Controller
  * Handles Razorpay payment integration
+ * Using Prisma for database operations
  */
 
 const crypto = require('crypto');
-const Order = require('../models/Order');
+const { prisma } = require('../config/prisma');
 
 // Razorpay configuration
 let Razorpay;
@@ -41,7 +42,10 @@ exports.createRazorpayOrder = async (req, res) => {
         }
 
         // Find the order
-        const order = await Order.findOne({ orderId });
+        const order = await prisma.order.findUnique({
+            where: { orderId },
+            include: { customer: true }
+        });
 
         if (!order) {
             return res.status(404).json({
@@ -79,8 +83,10 @@ exports.createRazorpayOrder = async (req, res) => {
         });
 
         // Update order with Razorpay order ID
-        order.razorpayOrderId = razorpayOrder.id;
-        await order.save();
+        await prisma.order.update({
+            where: { orderId },
+            data: { razorpayOrderId: razorpayOrder.id }
+        });
 
         res.status(200).json({
             success: true,
@@ -116,7 +122,9 @@ exports.verifyPayment = async (req, res) => {
         } = req.body;
 
         // Find the order
-        const order = await Order.findOne({ orderId });
+        const order = await prisma.order.findUnique({
+            where: { orderId }
+        });
 
         if (!order) {
             return res.status(404).json({
@@ -141,8 +149,10 @@ exports.verifyPayment = async (req, res) => {
 
         if (expectedSignature !== razorpay_signature) {
             // Update order with failed payment
-            order.paymentStatus = 'failed';
-            await order.save();
+            await prisma.order.update({
+                where: { orderId },
+                data: { paymentStatus: 'FAILED' }
+            });
 
             return res.status(400).json({
                 success: false,
@@ -150,16 +160,33 @@ exports.verifyPayment = async (req, res) => {
             });
         }
 
+        // Update status history
+        const statusHistory = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+        statusHistory.push({
+            status: 'CONFIRMED',
+            timestamp: new Date().toISOString(),
+            note: 'Payment verified'
+        });
+
         // Mark order as paid
-        await order.markAsPaid(razorpay_payment_id, razorpay_signature);
+        const updatedOrder = await prisma.order.update({
+            where: { orderId },
+            data: {
+                paymentStatus: 'PAID',
+                razorpayPaymentId: razorpay_payment_id,
+                razorpaySignature: razorpay_signature,
+                status: 'CONFIRMED',
+                statusHistory
+            }
+        });
 
         res.status(200).json({
             success: true,
             message: 'Payment verified successfully',
             data: {
-                orderId: order.orderId,
-                paymentStatus: order.paymentStatus,
-                status: order.status
+                orderId: updatedOrder.orderId,
+                paymentStatus: updatedOrder.paymentStatus,
+                status: updatedOrder.status
             }
         });
 
@@ -243,15 +270,27 @@ exports.handleWebhook = async (req, res) => {
 // Helper functions for webhook handlers
 async function handlePaymentCaptured(payment) {
     try {
-        const order = await Order.findOne({
-            razorpayOrderId: payment.order_id
+        const order = await prisma.order.findFirst({
+            where: { razorpayOrderId: payment.order_id }
         });
 
-        if (order && order.paymentStatus !== 'paid') {
-            order.razorpayPaymentId = payment.id;
-            order.paymentStatus = 'paid';
-            order.status = 'confirmed';
-            await order.save();
+        if (order && order.paymentStatus !== 'PAID') {
+            const statusHistory = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+            statusHistory.push({
+                status: 'CONFIRMED',
+                timestamp: new Date().toISOString(),
+                note: 'Payment captured via webhook'
+            });
+
+            await prisma.order.update({
+                where: { id: order.id },
+                data: {
+                    razorpayPaymentId: payment.id,
+                    paymentStatus: 'PAID',
+                    status: 'CONFIRMED',
+                    statusHistory
+                }
+            });
         }
     } catch (error) {
         // Error logged for debugging
@@ -261,13 +300,15 @@ async function handlePaymentCaptured(payment) {
 
 async function handlePaymentFailed(payment) {
     try {
-        const order = await Order.findOne({
-            razorpayOrderId: payment.order_id
+        const order = await prisma.order.findFirst({
+            where: { razorpayOrderId: payment.order_id }
         });
 
         if (order) {
-            order.paymentStatus = 'failed';
-            await order.save();
+            await prisma.order.update({
+                where: { id: order.id },
+                data: { paymentStatus: 'FAILED' }
+            });
         }
     } catch (error) {
         // Error logged for debugging
@@ -277,13 +318,26 @@ async function handlePaymentFailed(payment) {
 
 async function handleRefundProcessed(refund) {
     try {
-        const order = await Order.findOne({
-            razorpayPaymentId: refund.payment_id
+        const order = await prisma.order.findFirst({
+            where: { razorpayPaymentId: refund.payment_id }
         });
 
         if (order) {
-            order.paymentStatus = 'refunded';
-            await order.updateStatus('cancelled', 'Refund processed');
+            const statusHistory = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+            statusHistory.push({
+                status: 'CANCELLED',
+                timestamp: new Date().toISOString(),
+                note: 'Refund processed'
+            });
+
+            await prisma.order.update({
+                where: { id: order.id },
+                data: {
+                    paymentStatus: 'REFUNDED',
+                    status: 'CANCELLED',
+                    statusHistory
+                }
+            });
         }
     } catch (error) {
         // Error logged for debugging

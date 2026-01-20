@@ -1,0 +1,111 @@
+// Prisma Schema for Tawabil Spices
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Customer Model
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   @unique
+  email     String?
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+  @@index([email])
+}
+
+// Product Model
+model Product {
+  id          String   @id @default(cuid())
+  productId   String   @unique
+  name        String
+  description String?
+  category    String
+  origin      String?
+  benefits    String[]
+  isAvailable Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  image       String?
+  variants    Json     // Store pack sizes and prices as JSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([category])
+}
+
+// Order Model
+model Order {
+  id                 String        @id @default(cuid())
+  orderId            String        @unique
+
+  // Customer relation
+  customerId         String
+  customer           Customer      @relation(fields: [customerId], references: [id])
+
+  // Address (stored as JSON for flexibility)
+  address            Json
+
+  // Order items
+  items              Json
+
+  // Pricing
+  subtotal           Float
+  deliveryCharge     Float         @default(40)
+  total              Float
+
+  // Payment
+  paymentMethod      PaymentMethod
+  paymentStatus      PaymentStatus @default(PENDING)
+  razorpayOrderId    String?
+  razorpayPaymentId  String?
+  razorpaySignature  String?
+
+  // Status
+  status             OrderStatus   @default(PENDING)
+  statusHistory      Json          @default("[]")
+
+  // Delivery
+  deliverySlot       Json?
+  notes              String?
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([orderId])
+  @@index([customerId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+// Enums
+enum PaymentMethod {
+  ONLINE
+  COD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}

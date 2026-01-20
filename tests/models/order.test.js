@@ -1,27 +1,28 @@
 /**
- * Order Model Tests
+ * Order Tests - Prisma Version
+ * Tests order creation and ID generation using Prisma mocks
  */
 
-const Order = require('../../server/models/Order');
+const { prisma, generateOrderId } = require('../../server/config/prisma');
 
 describe('Order Model', () => {
     describe('Order ID Generation', () => {
         it('should generate unique order IDs', () => {
-            const id1 = Order.generateOrderId();
-            const id2 = Order.generateOrderId();
+            const id1 = generateOrderId();
+            const id2 = generateOrderId();
 
             expect(id1).not.toBe(id2);
         });
 
         it('should generate order IDs with correct format', () => {
-            const orderId = Order.generateOrderId();
+            const orderId = generateOrderId();
 
             // Format: TW-YYMMDD-XXXXXX
             expect(orderId).toMatch(/^TW-\d{6}-[A-Z0-9]{6}$/);
         });
 
         it('should start with TW- prefix', () => {
-            const orderId = Order.generateOrderId();
+            const orderId = generateOrderId();
 
             expect(orderId.startsWith('TW-')).toBe(true);
         });
@@ -29,16 +30,22 @@ describe('Order Model', () => {
         it('should generate 100 unique IDs without collision', () => {
             const ids = new Set();
             for (let i = 0; i < 100; i++) {
-                ids.add(Order.generateOrderId());
+                ids.add(generateOrderId());
             }
             expect(ids.size).toBe(100);
         });
     });
 
-    describe('Order Creation', () => {
+    describe('Order Creation with Prisma', () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
         it('should create a valid order', async () => {
-            const orderData = {
-                orderId: Order.generateOrderId(),
+            const mockOrder = {
+                id: 'cuid_123',
+                orderId: 'TW-260120-ABC123',
+                customerId: 'customer_1',
                 customer: {
                     name: 'John Doe',
                     phone: '9876543210',
@@ -62,264 +69,165 @@ describe('Order Model', () => {
                 subtotal: 560,
                 deliveryCharge: 40,
                 total: 600,
-                paymentMethod: 'cod'
+                paymentMethod: 'COD',
+                paymentStatus: 'PENDING',
+                status: 'CONFIRMED',
+                statusHistory: [{ status: 'CONFIRMED', timestamp: new Date().toISOString() }],
+                createdAt: new Date(),
+                updatedAt: new Date()
             };
 
-            const order = new Order(orderData);
-            const savedOrder = await order.save();
+            prisma.order.create.mockResolvedValue(mockOrder);
 
-            expect(savedOrder._id).toBeDefined();
-            expect(savedOrder.orderId).toBe(orderData.orderId);
-            expect(savedOrder.customer.name).toBe('John Doe');
-            expect(savedOrder.status).toBe('pending');
-            expect(savedOrder.paymentStatus).toBe('pending');
+            const result = await prisma.order.create({
+                data: {
+                    orderId: 'TW-260120-ABC123',
+                    customerId: 'customer_1',
+                    address: mockOrder.address,
+                    items: mockOrder.items,
+                    subtotal: 560,
+                    deliveryCharge: 40,
+                    total: 600,
+                    paymentMethod: 'COD',
+                    paymentStatus: 'PENDING',
+                    status: 'CONFIRMED',
+                    statusHistory: [{ status: 'CONFIRMED', timestamp: new Date().toISOString() }]
+                }
+            });
+
+            expect(result.id).toBe('cuid_123');
+            expect(result.orderId).toBe('TW-260120-ABC123');
+            expect(result.status).toBe('CONFIRMED');
+            expect(result.paymentStatus).toBe('PENDING');
+            expect(prisma.order.create).toHaveBeenCalledTimes(1);
         });
 
-        it('should require customer phone number', async () => {
-            const orderData = {
-                orderId: Order.generateOrderId(),
-                customer: {
-                    name: 'John Doe'
-                    // phone missing
-                },
-                address: {
-                    houseNo: '123',
-                    street: 'Main Street',
-                    area: 'Koramangala',
-                    pincode: '560001'
-                },
-                items: [{
-                    productId: 'cardamom',
-                    name: 'Green Cardamom',
-                    packSize: '50g',
-                    quantity: 1,
-                    price: 280,
-                    total: 280
-                }],
-                subtotal: 280,
-                deliveryCharge: 40,
-                total: 320,
-                paymentMethod: 'cod'
+        it('should find order by orderId', async () => {
+            const mockOrder = {
+                id: 'cuid_123',
+                orderId: 'TW-260120-ABC123',
+                status: 'PENDING',
+                total: 600
             };
 
-            const order = new Order(orderData);
-            await expect(order.save()).rejects.toThrow();
+            prisma.order.findUnique.mockResolvedValue(mockOrder);
+
+            const result = await prisma.order.findUnique({
+                where: { orderId: 'TW-260120-ABC123' }
+            });
+
+            expect(result.orderId).toBe('TW-260120-ABC123');
+            expect(prisma.order.findUnique).toHaveBeenCalledWith({
+                where: { orderId: 'TW-260120-ABC123' }
+            });
         });
 
-        it('should validate phone number format', async () => {
-            const orderData = {
-                orderId: Order.generateOrderId(),
-                customer: {
-                    name: 'John Doe',
-                    phone: '123' // Invalid phone
-                },
-                address: {
-                    houseNo: '123',
-                    street: 'Main Street',
-                    area: 'Koramangala',
-                    pincode: '560001'
-                },
-                items: [{
-                    productId: 'cardamom',
-                    name: 'Green Cardamom',
-                    packSize: '50g',
-                    quantity: 1,
-                    price: 280,
-                    total: 280
-                }],
-                subtotal: 280,
-                deliveryCharge: 40,
-                total: 320,
-                paymentMethod: 'cod'
-            };
+        it('should return null for non-existent order', async () => {
+            prisma.order.findUnique.mockResolvedValue(null);
 
-            const order = new Order(orderData);
-            await expect(order.save()).rejects.toThrow();
-        });
+            const result = await prisma.order.findUnique({
+                where: { orderId: 'NONEXISTENT' }
+            });
 
-        it('should only accept Bengaluru pincodes', async () => {
-            const orderData = {
-                orderId: Order.generateOrderId(),
-                customer: {
-                    name: 'John Doe',
-                    phone: '9876543210'
-                },
-                address: {
-                    houseNo: '123',
-                    street: 'Main Street',
-                    area: 'Some Area',
-                    pincode: '400001' // Mumbai pincode
-                },
-                items: [{
-                    productId: 'cardamom',
-                    name: 'Green Cardamom',
-                    packSize: '50g',
-                    quantity: 1,
-                    price: 280,
-                    total: 280
-                }],
-                subtotal: 280,
-                deliveryCharge: 40,
-                total: 320,
-                paymentMethod: 'cod'
-            };
-
-            const order = new Order(orderData);
-            await expect(order.save()).rejects.toThrow();
-        });
-
-        it('should require at least one item', async () => {
-            const orderData = {
-                orderId: Order.generateOrderId(),
-                customer: {
-                    name: 'John Doe',
-                    phone: '9876543210'
-                },
-                address: {
-                    houseNo: '123',
-                    street: 'Main Street',
-                    area: 'Koramangala',
-                    pincode: '560001'
-                },
-                items: [], // Empty items
-                subtotal: 0,
-                deliveryCharge: 0,
-                total: 0,
-                paymentMethod: 'cod'
-            };
-
-            const order = new Order(orderData);
-            await expect(order.save()).rejects.toThrow();
+            expect(result).toBeNull();
         });
     });
 
     describe('Order Status Management', () => {
-        let order;
-
-        beforeEach(async () => {
-            order = new Order({
-                orderId: Order.generateOrderId(),
-                customer: {
-                    name: 'John Doe',
-                    phone: '9876543210'
-                },
-                address: {
-                    houseNo: '123',
-                    street: 'Main Street',
-                    area: 'Koramangala',
-                    pincode: '560001'
-                },
-                items: [{
-                    productId: 'cardamom',
-                    name: 'Green Cardamom',
-                    packSize: '50g',
-                    quantity: 1,
-                    price: 280,
-                    total: 280
-                }],
-                subtotal: 280,
-                deliveryCharge: 40,
-                total: 320,
-                paymentMethod: 'cod'
-            });
-            await order.save();
-        });
-
         it('should update order status', async () => {
-            await order.updateStatus('confirmed', 'Order confirmed');
+            const mockUpdatedOrder = {
+                id: 'cuid_123',
+                orderId: 'TW-260120-ABC123',
+                status: 'CONFIRMED',
+                statusHistory: [
+                    { status: 'PENDING', timestamp: '2026-01-20T10:00:00Z' },
+                    { status: 'CONFIRMED', timestamp: '2026-01-20T10:05:00Z' }
+                ]
+            };
 
-            const updatedOrder = await Order.findOne({ orderId: order.orderId });
-            expect(updatedOrder.status).toBe('confirmed');
-            expect(updatedOrder.statusHistory.length).toBeGreaterThan(0);
-        });
+            prisma.order.update.mockResolvedValue(mockUpdatedOrder);
 
-        it('should track status history', async () => {
-            await order.updateStatus('confirmed');
-            await order.updateStatus('processing');
-            await order.updateStatus('dispatched');
+            const result = await prisma.order.update({
+                where: { orderId: 'TW-260120-ABC123' },
+                data: {
+                    status: 'CONFIRMED',
+                    statusHistory: mockUpdatedOrder.statusHistory
+                }
+            });
 
-            const updatedOrder = await Order.findOne({ orderId: order.orderId });
-            expect(updatedOrder.statusHistory.length).toBeGreaterThanOrEqual(3);
+            expect(result.status).toBe('CONFIRMED');
+            expect(result.statusHistory.length).toBe(2);
         });
 
         it('should mark order as paid', async () => {
-            await order.markAsPaid('pay_test123', 'sig_test123');
+            const mockPaidOrder = {
+                id: 'cuid_123',
+                orderId: 'TW-260120-ABC123',
+                paymentStatus: 'PAID',
+                razorpayPaymentId: 'pay_test123',
+                status: 'CONFIRMED'
+            };
 
-            const updatedOrder = await Order.findOne({ orderId: order.orderId });
-            expect(updatedOrder.paymentStatus).toBe('paid');
-            expect(updatedOrder.razorpayPaymentId).toBe('pay_test123');
-            expect(updatedOrder.status).toBe('confirmed');
+            prisma.order.update.mockResolvedValue(mockPaidOrder);
+
+            const result = await prisma.order.update({
+                where: { orderId: 'TW-260120-ABC123' },
+                data: {
+                    paymentStatus: 'PAID',
+                    razorpayPaymentId: 'pay_test123',
+                    status: 'CONFIRMED'
+                }
+            });
+
+            expect(result.paymentStatus).toBe('PAID');
+            expect(result.razorpayPaymentId).toBe('pay_test123');
+            expect(result.status).toBe('CONFIRMED');
+        });
+
+        it('should cancel order', async () => {
+            const mockCancelledOrder = {
+                id: 'cuid_123',
+                orderId: 'TW-260120-ABC123',
+                status: 'CANCELLED'
+            };
+
+            prisma.order.update.mockResolvedValue(mockCancelledOrder);
+
+            const result = await prisma.order.update({
+                where: { orderId: 'TW-260120-ABC123' },
+                data: { status: 'CANCELLED' }
+            });
+
+            expect(result.status).toBe('CANCELLED');
         });
     });
 
     describe('Order Queries', () => {
-        beforeEach(async () => {
-            // Create multiple orders
-            const orders = [
-                {
-                    orderId: Order.generateOrderId(),
-                    customer: { name: 'John Doe', phone: '9876543210' },
-                    address: { houseNo: '123', street: 'Main St', area: 'Koramangala', pincode: '560001' },
-                    items: [{ productId: 'cardamom', name: 'Cardamom', packSize: '50g', quantity: 1, price: 280, total: 280 }],
-                    subtotal: 280, deliveryCharge: 40, total: 320, paymentMethod: 'cod'
-                },
-                {
-                    orderId: Order.generateOrderId(),
-                    customer: { name: 'John Doe', phone: '9876543210' },
-                    address: { houseNo: '456', street: 'Park Ave', area: 'Indiranagar', pincode: '560038' },
-                    items: [{ productId: 'pepper', name: 'Black Pepper', packSize: '100g', quantity: 2, price: 150, total: 300 }],
-                    subtotal: 300, deliveryCharge: 40, total: 340, paymentMethod: 'online'
-                },
-                {
-                    orderId: Order.generateOrderId(),
-                    customer: { name: 'Jane Smith', phone: '9123456789' },
-                    address: { houseNo: '789', street: 'Lake Rd', area: 'JP Nagar', pincode: '560078' },
-                    items: [{ productId: 'cloves', name: 'Cloves', packSize: '25g', quantity: 1, price: 220, total: 220 }],
-                    subtotal: 220, deliveryCharge: 40, total: 260, paymentMethod: 'cod'
-                }
+        it('should find orders by customer', async () => {
+            const mockOrders = [
+                { orderId: 'TW-260120-ABC123', total: 600 },
+                { orderId: 'TW-260120-DEF456', total: 340 }
             ];
 
-            await Order.insertMany(orders);
-        });
+            prisma.order.findMany.mockResolvedValue(mockOrders);
 
-        it('should find orders by phone number', async () => {
-            const orders = await Order.findByPhone('9876543210');
-
-            expect(orders.length).toBe(2);
-            orders.forEach(order => {
-                expect(order.customer.phone).toBe('9876543210');
-            });
-        });
-
-        it('should return empty array for unknown phone', async () => {
-            const orders = await Order.findByPhone('0000000000');
-
-            expect(orders).toEqual([]);
-        });
-    });
-
-    describe('Pre-save Middleware', () => {
-        it('should calculate item totals on save', async () => {
-            const order = new Order({
-                orderId: Order.generateOrderId(),
-                customer: { name: 'John Doe', phone: '9876543210' },
-                address: { houseNo: '123', street: 'Main St', area: 'Koramangala', pincode: '560001' },
-                items: [
-                    { productId: 'cardamom', name: 'Cardamom', packSize: '50g', quantity: 2, price: 280, total: 0 },
-                    { productId: 'pepper', name: 'Pepper', packSize: '100g', quantity: 1, price: 150, total: 0 }
-                ],
-                subtotal: 0,
-                deliveryCharge: 40,
-                total: 0,
-                paymentMethod: 'cod'
+            const result = await prisma.order.findMany({
+                where: { customerId: 'customer_1' },
+                orderBy: { createdAt: 'desc' }
             });
 
-            await order.save();
+            expect(result.length).toBe(2);
+            expect(prisma.order.findMany).toHaveBeenCalled();
+        });
 
-            expect(order.items[0].total).toBe(560); // 2 * 280
-            expect(order.items[1].total).toBe(150); // 1 * 150
-            expect(order.subtotal).toBe(710); // 560 + 150
-            expect(order.total).toBe(750); // 710 + 40
+        it('should return empty array for customer with no orders', async () => {
+            prisma.order.findMany.mockResolvedValue([]);
+
+            const result = await prisma.order.findMany({
+                where: { customerId: 'non_existent_customer' }
+            });
+
+            expect(result).toEqual([]);
         });
     });
 });

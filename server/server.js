@@ -1,6 +1,7 @@
 /**
  * Tawabil Spices - Express Server
  * Backend API for cart and checkout system
+ * Using Prisma 7 with PostgreSQL
  */
 
 const path = require('path');
@@ -9,7 +10,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const connectDB = require('./config/db');
+const { connectDatabase, disconnectDatabase } = require('./config/prisma');
 const { initSentry, captureError } = require('./config/sentry');
 
 // Import routes
@@ -27,8 +28,8 @@ const sentry = initSentry(app);
 // Sentry request handler (must be first middleware)
 app.use(sentry.requestHandler);
 
-// Connect to MongoDB
-connectDB();
+// Connect to Prisma PostgreSQL
+connectDatabase();
 
 // Security middleware
 app.use(helmet());
@@ -59,7 +60,8 @@ app.get('/health', (req, res) => {
     res.status(200).json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        service: 'Tawabil API'
+        service: 'Tawabil API',
+        database: 'Prisma PostgreSQL'
     });
 });
 
@@ -98,21 +100,18 @@ app.use((err, req, res, next) => {
         });
     }
 
-    // Mongoose validation error
-    if (err.name === 'ValidationError') {
-        const errors = Object.values(err.errors).map(e => e.message);
-        return res.status(400).json({
-            success: false,
-            message: 'Validation error',
-            errors
-        });
-    }
-
-    // Mongoose duplicate key error
-    if (err.code === 11000) {
+    // Prisma error handling
+    if (err.code === 'P2002') {
         return res.status(400).json({
             success: false,
             message: 'Duplicate entry found'
+        });
+    }
+
+    if (err.code === 'P2025') {
+        return res.status(404).json({
+            success: false,
+            message: 'Record not found'
         });
     }
 
@@ -123,6 +122,17 @@ app.use((err, req, res, next) => {
             ? 'Internal server error'
             : err.message || 'Internal server error'
     });
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+    await disconnectDatabase();
+    process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+    await disconnectDatabase();
+    process.exit(0);
 });
 
 // Start server
@@ -137,6 +147,7 @@ if (require.main === module) {
 ║                                                   ║
 ║   Server running on port ${PORT}                     ║
 ║   Environment: ${process.env.NODE_ENV || 'development'}                    ║
+║   Database: Prisma PostgreSQL                     ║
 ║                                                   ║
 ╚═══════════════════════════════════════════════════╝
         `);

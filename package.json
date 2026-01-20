@@ -11,6 +11,8 @@
     "test:ci": "jest --ci --coverage --reporters=default --reporters=jest-junit"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
     "@sentry/node": "^7.100.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -19,6 +21,8 @@
     "express-validator": "^7.0.1",
     "helmet": "^7.1.0",
     "mongoose": "^8.0.3",
+    "pg": "^8.17.1",
+    "prisma": "^7.2.0",
     "razorpay": "^2.9.2",
     "uuid": "^9.0.1"
   },

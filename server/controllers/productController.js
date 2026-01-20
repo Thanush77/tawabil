@@ -1,9 +1,10 @@
 /**
  * Product Controller
  * Handles product-related API requests
+ * Using Prisma for database operations
  */
 
-const Product = require('../models/Product');
+const { prisma } = require('../config/prisma');
 const fs = require('fs');
 const path = require('path');
 
@@ -26,7 +27,9 @@ const loadProductsFromFile = () => {
 exports.getAllProducts = async (req, res) => {
     try {
         // Try to get from database first
-        let products = await Product.findActive();
+        let products = await prisma.product.findMany({
+            where: { isAvailable: true }
+        });
 
         // If no products in DB, load from JSON file
         if (!products || products.length === 0) {
@@ -44,6 +47,17 @@ exports.getAllProducts = async (req, res) => {
                 healthBenefits: p.healthBenefits,
                 image: p.image
             }));
+        } else {
+            // Transform Prisma products to match expected format
+            products = products.map(p => ({
+                productId: p.productId,
+                name: p.name,
+                origin: p.origin,
+                description: p.description,
+                benefits: p.benefits,
+                image: p.image,
+                variants: p.variants
+            }));
         }
 
         res.status(200).json({
@@ -53,6 +67,7 @@ exports.getAllProducts = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Error getting products:', error);
         // Fallback to file-based products
         const fileProducts = loadProductsFromFile();
 
@@ -85,7 +100,12 @@ exports.getProductById = async (req, res) => {
         const { id } = req.params;
 
         // Try database first
-        let product = await Product.findOne({ productId: id, active: true });
+        let product = await prisma.product.findFirst({
+            where: {
+                productId: id,
+                isAvailable: true
+            }
+        });
 
         // Fallback to file
         if (!product) {
